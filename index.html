@@ -6,7 +6,6 @@
   <title>互動學習平台</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <!-- html5-qrcode loaded at bottom of body with async to prevent blocking -->
   <style>
     :root {
       --bg: #FFF8F0;
@@ -612,7 +611,6 @@
 </head>
 <body>
 
-  <!-- ===== CONSENT SCREEN ===== -->
   <div id="consent-screen">
     <div class="consent-box">
       <span class="consent-icon">🎧</span>
@@ -629,7 +627,6 @@
     </div>
   </div>
 
-  <!-- ===== APP ===== -->
   <header class="app-header">
     <div class="header-inner">
       <div class="site-title" id="site-title">📚 互動<span>學習</span>平台</div>
@@ -652,7 +649,6 @@
   </nav>
 
   <main class="main-content">
-    <!-- Scanner Tab -->
     <div class="tab-panel active" id="panel-scanner">
       <div class="scanner-wrapper">
         <div class="scanner-header">
@@ -684,7 +680,6 @@
       </div>
     </div>
 
-    <!-- Books Tab -->
     <div class="tab-panel" id="panel-books">
       <div class="section-header">
         <h2>📖 數位書籍</h2>
@@ -693,7 +688,6 @@
       <div class="book-grid" id="book-grid"></div>
     </div>
 
-    <!-- Worksheets Tab -->
     <div class="tab-panel" id="panel-worksheets">
       <div class="section-header">
         <h2>📝 學習單下載</h2>
@@ -703,7 +697,6 @@
     </div>
   </main>
 
-  <!-- Book Viewer Modal -->
   <div class="modal-overlay" id="book-modal">
     <div class="modal-header">
       <div>
@@ -721,7 +714,6 @@
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
@@ -729,16 +721,17 @@
        GLOBAL STATE
     ======================================== */
     let config = null;
-    let audioContext = null;
-    let currentAudio = null;
     let scanner = null;
     let isScanning = false;
     let playHistory = [];
     let currentBook = null;
     let currentPageIndex = 0;
 
+    // ✨ 建立唯一的全域 Audio 物件，解決手機限制
+    const globalAudio = new Audio();
+
     /* ========================================
-       INITIALIZATION
+       INITIALIZATION & AUDIO SETUP
     ======================================== */
     async function loadConfig() {
       try {
@@ -757,37 +750,47 @@
       }
     }
 
+    // ✨ 一次性綁定音訊事件，避免重複綁定
+    globalAudio.addEventListener('timeupdate', () => {
+      if (globalAudio.duration) {
+        const pct = (globalAudio.currentTime / globalAudio.duration) * 100;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('audio-time').textContent = formatTime(globalAudio.currentTime);
+      }
+    });
+    globalAudio.addEventListener('play', () => document.getElementById('btn-play').textContent = '⏸');
+    globalAudio.addEventListener('pause', () => document.getElementById('btn-play').textContent = '▶');
+    globalAudio.addEventListener('ended', () => {
+      document.getElementById('btn-play').textContent = '▶';
+      document.getElementById('progress-fill').style.width = '0%';
+    });
+    globalAudio.addEventListener('error', () => {
+      showToast('⚠️ 音檔載入失敗');
+      document.getElementById('status-text').textContent = '⚠️ 音檔載入失敗';
+    });
+
     /* ========================================
-       CONSENT & AUDIO CONTEXT
+       CONSENT & UNLOCK AUDIO
     ======================================== */
     let consentHandled = false;
-    async function handleConsent() {
+    function handleConsent() {
       if (consentHandled) return;
       consentHandled = true;
 
-      // Create AudioContext on user gesture — this unlocks autoplay
-      try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
-        }
-      } catch (e) {
-        console.warn('AudioContext creation failed:', e);
-      }
-
-      // Also create a silent Audio to unlock HTML5 Audio on iOS
-      try {
-        const silentAudio = new Audio();
-        silentAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-        await silentAudio.play();
-        silentAudio.pause();
-      } catch(e) { /* OK */ }
-
+      // ✨ 立刻隱藏 UI，不讓 await 卡住畫面
       document.getElementById('consent-screen').classList.add('hidden');
       setTimeout(() => {
         document.getElementById('consent-screen').style.display = 'none';
         startScanner();
       }, 500);
+
+      // ✨ 利用使用者的這一次「點擊」，無痛解鎖 globalAudio
+      try {
+        globalAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+        globalAudio.play().then(() => {
+          globalAudio.pause();
+        }).catch(e => console.log('音訊解鎖提示:', e));
+      } catch(e) {}
     }
 
     /* ========================================
@@ -797,7 +800,6 @@
       const statusDot = document.getElementById('status-dot');
       const statusText = document.getElementById('status-text');
 
-      // Wait for html5-qrcode library to load (loaded async)
       if (typeof Html5Qrcode === 'undefined') {
         statusText.textContent = '正在載入掃描器...';
         let retries = 0;
@@ -807,7 +809,7 @@
             if (typeof Html5Qrcode !== 'undefined') {
               clearInterval(check);
               resolve();
-            } else if (retries > 50) { // 5 seconds timeout
+            } else if (retries > 50) {
               clearInterval(check);
               resolve();
             }
@@ -833,7 +835,7 @@
             aspectRatio: 1.0,
           },
           onScanSuccess,
-          () => {}  // ignore scan failures
+          () => {}  
         );
         isScanning = true;
         statusDot.classList.add('scanning');
@@ -847,7 +849,6 @@
 
     let lastScanTime = 0;
     async function onScanSuccess(decodedText) {
-      // Throttle: ignore scans within 2 seconds of the last one
       const now = Date.now();
       if (now - lastScanTime < 2000) return;
       lastScanTime = now;
@@ -858,11 +859,9 @@
       statusDot.classList.add('found');
       statusText.textContent = '✅ 已掃描到內容，正在播放...';
 
-      // Determine what to play
       let audioUrl = decodedText;
       let audioName = '';
 
-      // Check if it matches a config entry
       if (config && config.audioFiles) {
         const match = config.audioFiles.find(a =>
           a.id === decodedText || a.file === decodedText
@@ -873,17 +872,12 @@
         }
       }
 
-      // If not a URL, might be a relative path
       if (!audioUrl.startsWith('http') && !audioUrl.startsWith('/') && !audioUrl.startsWith('audio/')) {
-        // Treat as an ID, try to find in config
-        if (!audioName) {
-          audioName = decodedText;
-        }
+        if (!audioName) audioName = decodedText;
       }
 
       playAudio(audioUrl, audioName || audioUrl);
 
-      // Brief pause then resume scanning
       setTimeout(() => {
         statusDot.classList.remove('found');
         statusDot.classList.add('scanning');
@@ -895,78 +889,38 @@
        AUDIO PLAYER
     ======================================== */
     function playAudio(url, name) {
-      // Stop current audio
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-      }
-
-      // Resume AudioContext if needed
-      if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
-      }
-
-      currentAudio = new Audio(url);
-      currentAudio.crossOrigin = 'anonymous';
+      // ✨ 不再建立 new Audio()，而是重複使用已經解鎖的 globalAudio
+      globalAudio.pause();
+      globalAudio.src = url;
+      globalAudio.crossOrigin = 'anonymous';
 
       const player = document.getElementById('audio-player');
-      const titleEl = document.getElementById('audio-title');
-      const fileEl = document.getElementById('audio-file-name');
-      const btnPlay = document.getElementById('btn-play');
-      const progressFill = document.getElementById('progress-fill');
-      const timeEl = document.getElementById('audio-time');
-
-      titleEl.textContent = name || '正在播放';
-      fileEl.textContent = url;
+      document.getElementById('audio-title').textContent = name || '正在播放';
+      document.getElementById('audio-file-name').textContent = url;
       player.classList.add('visible');
 
-      currentAudio.addEventListener('timeupdate', () => {
-        if (currentAudio.duration) {
-          const pct = (currentAudio.currentTime / currentAudio.duration) * 100;
-          progressFill.style.width = pct + '%';
-          timeEl.textContent = formatTime(currentAudio.currentTime);
-        }
-      });
-
-      currentAudio.addEventListener('play', () => {
-        btnPlay.textContent = '⏸';
-      });
-      currentAudio.addEventListener('pause', () => {
-        btnPlay.textContent = '▶';
-      });
-      currentAudio.addEventListener('ended', () => {
-        btnPlay.textContent = '▶';
-        progressFill.style.width = '0%';
-      });
-      currentAudio.addEventListener('error', () => {
-        showToast('⚠️ 音檔載入失敗：' + url);
-        document.getElementById('status-text').textContent = '⚠️ 音檔載入失敗';
-      });
-
-      currentAudio.play().catch(err => {
+      globalAudio.play().catch(err => {
         console.error('播放失敗:', err);
-        showToast('⚠️ 播放失敗，請重新點擊同意按鈕');
+        showToast('⚠️ 播放失敗，請點擊下方播放鈕重試');
       });
 
-      // Add to history
       addToHistory(name || url, url);
     }
 
     function togglePlay() {
-      if (!currentAudio) return;
-      if (currentAudio.paused) {
-        currentAudio.play();
+      if (globalAudio.paused) {
+        globalAudio.play();
       } else {
-        currentAudio.pause();
+        globalAudio.pause();
       }
     }
 
     function seek(e) {
-      if (!currentAudio || !currentAudio.duration) return;
+      if (!globalAudio.duration) return;
       const bar = document.getElementById('progress-bar');
       const rect = bar.getBoundingClientRect();
       const pct = (e.clientX - rect.left) / rect.width;
-      currentAudio.currentTime = pct * currentAudio.duration;
+      globalAudio.currentTime = pct * globalAudio.duration;
     }
 
     function formatTime(s) {
@@ -1176,7 +1130,6 @@
     loadConfig();
   </script>
 
-  <!-- Load QR library async so it doesn't block page rendering -->
   <script>
     (function() {
       var s = document.createElement('script');
