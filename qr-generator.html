@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code 產生器 - 互動學習平台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #FFF8F0;
+      --primary: #FF6B35;
+      --secondary: #1B4965;
+      --text: #2C2C2C;
+      --text-light: #6B7280;
+      --border: #E5E7EB;
+      --radius: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--secondary);
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-light);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--secondary);
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 12px;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .btn {
+      background: linear-gradient(135deg, var(--primary), #FF8C5A);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 16px;
+      box-shadow: 0 4px 16px rgba(255,107,53,0.3);
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: var(--secondary);
+      box-shadow: 0 4px 16px rgba(27,73,101,0.3);
+    }
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .qr-item {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      text-align: center;
+    }
+    .qr-item canvas { margin: 0 auto; }
+    .qr-label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+      word-break: break-all;
+    }
+    .qr-content {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+      word-break: break-all;
+    }
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .mode-tab {
+      padding: 8px 20px;
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      background: white;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-tab.active {
+      border-color: var(--primary);
+      background: #FFF0E8;
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .btn-print {
+      background: white;
+      color: var(--secondary);
+      border: 2px solid var(--secondary);
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      font-family: inherit;
+      margin: 16px 8px 0 0;
+      box-shadow: none;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .card, .mode-tabs, .btn, .btn-print, .subtitle, h1 { display: none; }
+      .qr-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .qr-item { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏷 QR Code 產生器</h1>
+    <p class="subtitle">為你的音檔快速產生 QR Code，列印後貼在課本上即可使用</p>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="setMode('single')">單一產生</button>
+      <button class="mode-tab" onclick="setMode('batch')">批次產生</button>
+      <button class="mode-tab" onclick="setMode('config')">從 config.json</button>
+    </div>
+
+    <!-- Single Mode -->
+    <div class="card" id="mode-single">
+      <label>QR Code 內容</label>
+      <p class="hint">輸入音檔 ID（如 lesson01）或檔案路徑（如 audio/lesson01.mp3）</p>
+      <input type="text" id="single-content" placeholder="lesson01">
+      <div style="margin-top: 12px;">
+        <label>標籤名稱（選填）</label>
+        <input type="text" id="single-label" placeholder="第一課 我的家人">
+      </div>
+      <button class="btn" onclick="generateSingle()">產生 QR Code</button>
+    </div>
+
+    <!-- Batch Mode -->
+    <div class="card" id="mode-batch" style="display:none;">
+      <label>批次輸入</label>
+      <p class="hint">每行一筆，格式：<code>內容, 標籤名稱</code>（標籤可省略）</p>
+      <textarea id="batch-input" placeholder="lesson01, 第一課 我的家人
+lesson02, 第二課 去動物園
+lesson03, 第三課 美麗的花
+audio/extra01.mp3, 補充教材"></textarea>
+      <button class="btn" onclick="generateBatch()">批次產生</button>
+    </div>
+
+    <!-- Config Mode -->
+    <div class="card" id="mode-config" style="display:none;">
+      <label>從 config.json 自動產生</label>
+      <p class="hint">上傳你的 config.json，自動為所有音檔產生 QR Code</p>
+      <input type="file" id="config-file" accept=".json" style="margin: 12px 0;">
+      <br>
+      <button class="btn" onclick="generateFromConfig()">讀取並產生</button>
+    </div>
+
+    <div id="output">
+      <div class="qr-grid" id="qr-grid"></div>
+      <div id="action-buttons" style="display:none; margin-top: 16px;">
+        <button class="btn-print" onclick="window.print()">🖨 列印 QR Code</button>
+        <button class="btn-print" onclick="downloadAll()">💾 下載全部圖片</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = 'single';
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-tab').forEach((tab, i) => {
+        tab.classList.toggle('active', ['single','batch','config'][i] === mode);
+      });
+      document.getElementById('mode-single').style.display = mode === 'single' ? 'block' : 'none';
+      document.getElementById('mode-batch').style.display = mode === 'batch' ? 'block' : 'none';
+      document.getElementById('mode-config').style.display = mode === 'config' ? 'block' : 'none';
+    }
+
+    function generateSingle() {
+      const content = document.getElementById('single-content').value.trim();
+      const label = document.getElementById('single-label').value.trim();
+      if (!content) return alert('請輸入 QR Code 內容');
+      renderQRCodes([{ content, label: label || content }]);
+    }
+
+    function generateBatch() {
+      const input = document.getElementById('batch-input').value.trim();
+      if (!input) return alert('請輸入批次資料');
+      const items = input.split('\n').filter(Boolean).map(line => {
+        const parts = line.split(',').map(s => s.trim());
+        return { content: parts[0], label: parts[1] || parts[0] };
+      });
+      renderQRCodes(items);
+    }
+
+    function generateFromConfig() {
+      const fileInput = document.getElementById('config-file');
+      if (!fileInput.files.length) return alert('請選擇 config.json 檔案');
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const config = JSON.parse(e.target.result);
+          if (!config.audioFiles || !config.audioFiles.length) {
+            return alert('config.json 中沒有找到 audioFiles');
+          }
+          const items = config.audioFiles.map(a => ({
+            content: a.id,
+            label: a.name || a.id
+          }));
+          renderQRCodes(items);
+        } catch (err) {
+          alert('JSON 格式錯誤：' + err.message);
+        }
+      };
+      reader.readAsText(fileInput.files[0]);
+    }
+
+    function renderQRCodes(items) {
+      const grid = document.getElementById('qr-grid');
+      grid.innerHTML = '';
+      document.getElementById('action-buttons').style.display = 'block';
+
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'qr-item';
+
+        const qrDiv = document.createElement('div');
+        div.appendChild(qrDiv);
+
+        new QRCode(qrDiv, {
+          text: item.content,
+          width: 160,
+          height: 160,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'qr-label';
+        labelEl.textContent = item.label;
+        div.appendChild(labelEl);
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'qr-content';
+        contentEl.textContent = item.content;
+        div.appendChild(contentEl);
+
+        grid.appendChild(div);
+      });
+    }
+
+    function downloadAll() {
+      const items = document.querySelectorAll('.qr-item');
+      items.forEach((item, i) => {
+        const canvas = item.querySelector('canvas');
+        const label = item.querySelector('.qr-label').textContent;
+        if (canvas) {
+          const link = document.createElement('a');
+          link.download = `qrcode-${label || i}.png`;
+          link.href = canvas.toDataURL();
+          link.click();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
