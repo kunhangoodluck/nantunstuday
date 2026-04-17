@@ -1424,16 +1424,24 @@
       });
     }
 
-    function createQRCard(container, content, label) {
-      const card = document.createElement('div');
-      card.className = 'qr-card';
-      const qrDiv = document.createElement('div');
-      card.appendChild(qrDiv);
-      new QRCode(qrDiv, { text: content, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
-      card.innerHTML += `<div class="qr-label">${esc(label)}</div>
-        <div class="qr-sublabel">${esc(content)}</div>`;
-      container.appendChild(card);
-    }
+function createQRCard(container, content, label) {
+  const card = document.createElement('div');
+  card.className = 'qr-card';
+  
+  const qrDiv = document.createElement('div');
+  card.appendChild(qrDiv);
+  
+  // 生成 QR Code
+  new QRCode(qrDiv, { text: content, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
+  
+  // ✅ 正確寫法：使用 insertAdjacentHTML，這只會把新元素「插入」到後面，不會觸發整個 DOM 重繪
+  card.insertAdjacentHTML('beforeend', `
+    <div class="qr-label">${esc(label)}</div>
+    <div class="qr-sublabel">${esc(content)}</div>
+  `);
+  
+  container.appendChild(card);
+}
 
     function downloadAllQR() {
       const cards = document.querySelectorAll('.page-panel.active .qr-card');
