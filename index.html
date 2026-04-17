@@ -6,7 +6,7 @@
   <title>互動學習平台</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <!-- html5-qrcode loaded at bottom of body with async to prevent blocking -->
   <style>
     :root {
       --bg: #FFF8F0;
@@ -28,6 +28,13 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* Critical mobile fix: remove 300ms tap delay on all interactive elements */
+    button, a, [onclick], .book-card, .history-item, .tab-btn, .btn-consent, .btn-play, .btn-nav, .btn-close-modal, .btn-download {
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      cursor: pointer;
+    }
 
     body {
       font-family: 'Noto Sans TC', sans-serif;
@@ -753,7 +760,11 @@
     /* ========================================
        CONSENT & AUDIO CONTEXT
     ======================================== */
+    let consentHandled = false;
     async function handleConsent() {
+      if (consentHandled) return;
+      consentHandled = true;
+
       // Create AudioContext on user gesture — this unlocks autoplay
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -785,6 +796,29 @@
     async function startScanner() {
       const statusDot = document.getElementById('status-dot');
       const statusText = document.getElementById('status-text');
+
+      // Wait for html5-qrcode library to load (loaded async)
+      if (typeof Html5Qrcode === 'undefined') {
+        statusText.textContent = '正在載入掃描器...';
+        let retries = 0;
+        await new Promise((resolve) => {
+          const check = setInterval(() => {
+            retries++;
+            if (typeof Html5Qrcode !== 'undefined') {
+              clearInterval(check);
+              resolve();
+            } else if (retries > 50) { // 5 seconds timeout
+              clearInterval(check);
+              resolve();
+            }
+          }, 100);
+        });
+      }
+
+      if (typeof Html5Qrcode === 'undefined') {
+        statusText.textContent = '⚠️ 掃描器載入失敗，請重新整理頁面';
+        return;
+      }
 
       try {
         scanner = new Html5Qrcode('qr-reader');
@@ -1131,8 +1165,37 @@
       if (e.key === 'Escape') closeBookModal();
     });
 
+    // Backup: also bind consent button via addEventListener (more reliable on some mobile browsers)
+    document.getElementById('btn-agree').addEventListener('click', handleConsent);
+    document.getElementById('btn-agree').addEventListener('touchend', function(e) {
+      e.preventDefault();
+      handleConsent();
+    });
+
     // Init
     loadConfig();
+  </script>
+
+  <!-- Load QR library async so it doesn't block page rendering -->
+  <script>
+    (function() {
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+      s.async = true;
+      s.onload = function() { console.log('QR library loaded'); };
+      s.onerror = function() {
+        console.warn('QR library failed to load from CDN, trying fallback...');
+        var s2 = document.createElement('script');
+        s2.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+        s2.async = true;
+        s2.onerror = function() {
+          var statusText = document.getElementById('status-text');
+          if (statusText) statusText.textContent = '⚠️ QR Code 掃描器載入失敗，請確認網路連線';
+        };
+        document.body.appendChild(s2);
+      };
+      document.body.appendChild(s);
+    })();
   </script>
 </body>
 </html>

@@ -548,6 +548,13 @@
     }
 
     /* ===== RESPONSIVE ===== */
+    .page-panel { display: none; animation: fadeIn 0.25s ease-out; }
+    .page-panel.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
