@@ -4,32 +4,15 @@
   "audioFiles": [
     {
       "id": "lesson01",
-      "name": "第一課 範例音檔",
-      "file": "audio/sample.mp3",
-      "description": "這是一個範例音檔，請替換為您的音檔"
+      "name": "麻穎湯",
+      "file": "audio/lesson01.mp3"
+    },
+    {
+      "id": "lesson02",
+      "name": "麻穎湯_KALA",
+      "file": "audio/lesson02.mp3"
     }
   ],
-  "books": [
-    {
-      "id": "book01",
-      "title": "範例課本",
-      "cover": "books/sample-book/cover.jpg",
-      "pages": [
-        "books/sample-book/page01.jpg",
-        "books/sample-book/page02.jpg",
-        "books/sample-book/page03.jpg"
-      ],
-      "description": "這是範例課本，請替換為您的掃描圖片"
-    }
-  ],
-  "worksheets": [
-    {
-      "id": "ws01",
-      "title": "範例學習單",
-      "file": "worksheets/sample.pdf",
-      "description": "這是範例學習單，請替換為您的檔案",
-      "grade": "三年級",
-      "subject": "國語"
-    }
-  ]
+  "books": [],
+  "worksheets": []
 }
