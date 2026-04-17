@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>互動學習平台 — 內容管理工具</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #F4F1EC;
+      --bg-card: #FFFFFF;
+      --bg-sidebar: #1B2A3D;
+      --bg-sidebar-hover: #243547;
+      --bg-sidebar-active: #2D4562;
+      --primary: #E8642C;
+      --primary-hover: #D45820;
+      --primary-pale: #FFF0E8;
+      --secondary: #1B4965;
+      --accent-green: #2D8F5E;
+      --accent-green-pale: #E6F5ED;
+      --accent-blue: #3B82F6;
+      --accent-blue-pale: #EFF6FF;
+      --accent-purple: #7C3AED;
+      --accent-purple-pale: #F3EEFF;
+      --danger: #DC2626;
+      --danger-pale: #FEF2F2;
+      --text: #1A1A1A;
+      --text-secondary: #5F6B7A;
+      --text-muted: #9CA3AF;
+      --border: #E2E0DB;
+      --border-light: #F0EEEA;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow: 0 2px 10px rgba(0,0,0,0.07);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --sidebar-w: 240px;
+      --topbar-h: 0px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 200;
+      transition: transform 0.3s;
+    }
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-brand h1 {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+    }
+    .sidebar-brand p {
+      font-size: 12px;
+      opacity: 0.5;
+      margin-top: 4px;
+    }
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .nav-section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      opacity: 0.35;
+      padding: 16px 12px 6px;
+      font-weight: 700;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      transition: all 0.15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+    .nav-item:hover { background: var(--bg-sidebar-hover); color: white; }
+    .nav-item.active {
+      background: var(--bg-sidebar-active);
+      color: white;
+      font-weight: 700;
+    }
+    .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(255,255,255,0.15);
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .btn-export-sidebar {
+      width: 100%;
+      padding: 11px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-export-sidebar:hover { background: var(--primary-hover); }
+
+    /* ===== MOBILE SIDEBAR TOGGLE ===== */
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 12px; left: 12px;
+      z-index: 300;
+      width: 42px; height: 42px;
+      background: var(--bg-sidebar);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 190;
+    }
+
+    /* ===== MAIN ===== */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      min-height: 100vh;
+    }
+    .content-area {
+      padding: 32px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* ===== PAGE HEADER ===== */
+    .page-header {
+      margin-bottom: 28px;
+    }
+    .page-header h2 {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--secondary);
+      letter-spacing: -0.5px;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+    }
+    .card-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .card-body { padding: 22px; }
+
+    /* ===== FORMS ===== */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      letter-spacing: 0.2px;
+    }
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: white;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(232,100,44,0.1);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success {
+      background: var(--accent-green);
+      color: white;
+    }
+    .btn-outline {
+      background: white;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--text-secondary); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 6px 10px;
+    }
+    .btn-ghost:hover { background: var(--border-light); }
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--danger);
+      padding: 6px 10px;
+    }
+    .btn-danger-ghost:hover { background: var(--danger-pale); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-lg { padding: 13px 28px; font-size: 15px; }
+    .btn-block { width: 100%; justify-content: center; }
+
+    /* ===== DATA TABLE / LIST ===== */
+    .item-list { list-style: none; }
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--border-light);
+      transition: background 0.1s;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: #FAFAF8; }
+    .item-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .item-icon.audio { background: var(--primary-pale); }
+    .item-icon.book { background: var(--accent-blue-pale); }
+    .item-icon.worksheet { background: var(--accent-green-pale); }
+    .item-info { flex: 1; min-width: 0; }
+    .item-name {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .item-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ===== DIALOG / MODAL ===== */
+    .dialog-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      padding: 20px;
+    }
+    .dialog-overlay.open { display: flex; }
+    .dialog {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: dialogIn 0.2s ease-out;
+    }
+    @keyframes dialogIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .dialog-header {
+      padding: 20px 24px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dialog-header h3 { font-size: 18px; font-weight: 800; }
+    .dialog-body { padding: 0 24px 24px; }
+    .dialog-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ===== PAGES LIST (for books) ===== */
+    .pages-list {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      min-height: 60px;
+      padding: 8px;
+    }
+    .page-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--accent-blue-pale);
+      color: var(--accent-blue);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin: 3px;
+    }
+    .page-chip-remove {
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0.6;
+      background: none;
+      border: none;
+      color: inherit;
+      padding: 0 2px;
+    }
+    .page-chip-remove:hover { opacity: 1; }
+    .add-page-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .add-page-row .form-input { flex: 1; }
+
+    /* ===== QR CODE SECTION ===== */
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 16px;
+    }
+    .qr-card {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-light);
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .qr-card canvas { max-width: 100%; height: auto; }
+    .qr-label {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 10px;
+      color: var(--secondary);
+    }
+    .qr-sublabel {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      word-break: break-all;
+    }
+
+    /* ===== JSON PREVIEW ===== */
+    .json-preview {
+      background: #1E293B;
+      color: #E2E8F0;
+      border-radius: var(--radius);
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.65;
+      overflow-x: auto;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre;
+      tab-size: 2;
+    }
+    .json-key { color: #7DD3FC; }
+    .json-string { color: #86EFAC; }
+    .json-number { color: #FCA5A5; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+    }
+    .empty-state .empty-icon { font-size: 44px; margin-bottom: 12px; display: block; }
+    .empty-state h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .empty-state p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+    /* ===== TOAST ===== */
+    .toast-container {
+      position: fixed;
+      top: 20px; right: 20px;
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast-msg {
+      background: var(--secondary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      animation: toastIn 0.25s ease-out;
+    }
+    .toast-msg.success { background: var(--accent-green); }
+    .toast-msg.error { background: var(--danger); }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ===== IMPORT AREA ===== */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-pale);
+    }
+    .drop-zone .drop-icon { font-size: 36px; margin-bottom: 8px; display: block; }
+    .drop-zone p { font-size: 14px; color: var(--text-secondary); }
+    .drop-zone small { font-size: 12px; color: var(--text-muted); }
+
+    /* ===== SECTION TABS ===== */
+    .section-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: white;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+    }
+    .section-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .section-tab.active {
+      background: var(--secondary);
+      color: white;
+      font-weight: 700;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-toggle { display: flex; align-items: center; justify-content: center; }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .content-area { padding: 20px 16px; padding-top: 60px; }
+      .form-row { grid-template-columns: 1fr; }
+      .qr-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      body { background: white; }
+      .sidebar, .sidebar-toggle, .main > *:not(#page-qrcodes),
+      .page-header, .section-tabs, .btn, .card-header, .toast-container { display: none !important; }
+      .main { margin-left: 0; }
+      .content-area { padding: 0; max-width: none; }
+      .qr-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .qr-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      #page-qrcodes { display: block !important; }
+      #page-qrcodes .card { box-shadow: none; border: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <h1>📚 學習平台管理</h1>
+      <p>Content Manager</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">內容管理</div>
+      <button class="nav-item active" data-page="audio" onclick="showPage('audio')">
+        <span class="nav-icon">🔊</span> 音檔管理
+        <span class="nav-badge" id="badge-audio">0</span>
+      </button>
+      <button class="nav-item" data-page="books" onclick="showPage('books')">
+        <span class="nav-icon">📖</span> 書籍管理
+        <span class="nav-badge" id="badge-books">0</span>
+      </button>
+      <button class="nav-item" data-page="worksheets" onclick="showPage('worksheets')">
+        <span class="nav-icon">📝</span> 學習單管理
+        <span class="nav-badge" id="badge-worksheets">0</span>
+      </button>
+
+      <div class="nav-section-label">輸出</div>
+      <button class="nav-item" data-page="qrcodes" onclick="showPage('qrcodes')">
+        <span class="nav-icon">🏷</span> QR Code 產生
+      </button>
+      <button class="nav-item" data-page="preview" onclick="showPage('preview')">
+        <span class="nav-icon">📄</span> config.json 預覽
+      </button>
+
+      <div class="nav-section-label">工具</div>
+      <button class="nav-item" data-page="github" onclick="showPage('github')">
+        <span class="nav-icon">🐙</span> GitHub 連線
+        <span class="nav-badge" id="badge-github" style="background:rgba(255,255,255,0.08)">⚪</span>
+      </button>
+      <button class="nav-item" data-page="import" onclick="showPage('import')">
+        <span class="nav-icon">📥</span> 匯入 / 匯出
+      </button>
+      <button class="nav-item" data-page="settings" onclick="showPage('settings')">
+        <span class="nav-icon">⚙️</span> 網站設定
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-export-sidebar" id="btn-sidebar-push" onclick="pushToGitHub()" title="需要先設定 GitHub 連線">
+        🚀 推送到 GitHub
+      </button>
+      <button class="btn-export-sidebar" style="margin-top:6px;background:var(--bg-sidebar-active);" onclick="downloadConfig()">
+        💾 下載 config.json
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main">
+    <div class="content-area">
+
+      <!-- ==================== AUDIO PAGE ==================== -->
+      <div class="page-panel active" id="page-audio">
+        <div class="page-header">
+          <h2>🔊 音檔管理</h2>
+          <p>新增、編輯音檔項目，掃描 QR Code 時會播放對應音檔</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>音檔清單</h3>
+            <button class="btn btn-primary btn-sm" onclick="openAudioDialog()">＋ 新增音檔</button>
+          </div>
+          <div id="audio-list"></div>
+        </div>
+      </div>
+
+      <!-- ==================== BOOKS PAGE ==================== -->
+      <div class="page-panel" id="page-books">
+        <div class="page-header">
+          <h2>📖 書籍管理</h2>
+          <p>管理數位化書籍的封面與頁面圖片路徑</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>書籍清單</h3>
+            <button class="btn btn-primary btn-sm" onclick="openBookDialog()">＋ 新增書籍</button>
+          </div>
+          <div id="books-list"></div>
+        </div>
+      </div>
+
+      <!-- ==================== WORKSHEETS PAGE ==================== -->
+      <div class="page-panel" id="page-worksheets">
+        <div class="page-header">
+          <h2>📝 學習單管理</h2>
+          <p>管理可下載的學習單檔案</p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>學習單清單</h3>
+            <button class="btn btn-primary btn-sm" onclick="openWorksheetDialog()">＋ 新增學習單</button>
+          </div>
+          <div id="worksheets-list"></div>
+        </div>
+      </div>
+
+      <!-- ==================== QRCODES PAGE ==================== -->
+      <div class="page-panel" id="page-qrcodes">
+        <div class="page-header">
+          <h2>🏷 QR Code 產生</h2>
+          <p>根據你設定的音檔自動產生 QR Code，可列印後貼在課本上</p>
+        </div>
+
+        <div class="section-tabs">
+          <button class="section-tab active" onclick="setQrMode('auto')">📋 從音檔自動產生</button>
+          <button class="section-tab" onclick="setQrMode('custom')">✏️ 自訂內容</button>
+        </div>
+
+        <!-- Auto QR from audio list -->
+        <div id="qr-auto">
+          <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-outline" onclick="window.print()">🖨 列印全部</button>
+            <button class="btn btn-outline" onclick="downloadAllQR()">💾 下載全部圖片</button>
+          </div>
+          <div class="qr-grid" id="qr-auto-grid"></div>
+        </div>
+
+        <!-- Custom QR input -->
+        <div id="qr-custom" style="display:none;">
+          <div class="card" style="margin-bottom: 20px;">
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">批次輸入（每行一筆）</label>
+                <p class="form-hint">格式：QR內容, 標籤名稱（標籤可省略）</p>
+                <textarea class="form-textarea" id="custom-qr-input" rows="6"
+                  placeholder="lesson01, 第一課 我的家人&#10;lesson02, 第二課 去動物園&#10;https://example.com/audio.mp3, 外部音檔"></textarea>
+              </div>
+              <button class="btn btn-primary" onclick="generateCustomQR()">產生 QR Code</button>
+            </div>
+          </div>
+          <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-outline" onclick="window.print()">🖨 列印全部</button>
+            <button class="btn btn-outline" onclick="downloadAllQR()">💾 下載全部圖片</button>
+          </div>
+          <div class="qr-grid" id="qr-custom-grid"></div>
+        </div>
+      </div>
+
+      <!-- ==================== JSON PREVIEW PAGE ==================== -->
+      <div class="page-panel" id="page-preview">
+        <div class="page-header">
+          <h2>📄 config.json 預覽</h2>
+          <p>即時預覽產出的設定檔內容</p>
+        </div>
+        <div style="margin-bottom: 16px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" onclick="downloadConfig()">💾 下載 config.json</button>
+          <button class="btn btn-outline" onclick="copyConfig()">📋 複製到剪貼簿</button>
+        </div>
+        <div class="json-preview" id="json-preview"></div>
+      </div>
+
+      <!-- ==================== IMPORT / EXPORT PAGE ==================== -->
+      <div class="page-panel" id="page-import">
+        <div class="page-header">
+          <h2>📥 匯入 / 匯出</h2>
+          <p>匯入既有的 config.json 繼續編輯，或匯出目前的設定</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header"><h3>匯入 config.json</h3></div>
+          <div class="card-body">
+            <div class="drop-zone" id="drop-zone"
+              onclick="document.getElementById('file-import').click()">
+              <span class="drop-icon">📂</span>
+              <p>拖放 config.json 到此處，或點擊選擇檔案</p>
+              <small>支援 .json 格式</small>
+            </div>
+            <input type="file" id="file-import" accept=".json" style="display:none"
+              onchange="importConfig(this)">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>匯出</h3></div>
+          <div class="card-body">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="downloadConfig()">💾 下載 config.json</button>
+              <button class="btn btn-outline" onclick="copyConfig()">📋 複製 JSON</button>
+              <button class="btn btn-danger-ghost" onclick="clearAll()">🗑 清除所有資料</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== GITHUB PAGE ==================== -->
+      <div class="page-panel" id="page-github">
+        <div class="page-header">
+          <h2>🐙 GitHub 連線設定</h2>
+          <p>設定完成後，可直接從管理工具將 config.json 推送到 GitHub 倉庫</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header"><h3>連線資訊</h3></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">GitHub 帳號名稱</label>
+              <input class="form-input" id="gh-owner" placeholder="your-username" oninput="saveGitHubSettings()">
+              <p class="form-hint">你的 GitHub 使用者名稱</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">倉庫名稱</label>
+              <input class="form-input" id="gh-repo" placeholder="learning-platform" oninput="saveGitHubSettings()">
+              <p class="form-hint">例如 learning-platform（不包含 github.com 前綴）</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Personal Access Token (PAT)</label>
+              <div style="position:relative;">
+                <input class="form-input" id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" oninput="saveGitHubSettings()" style="padding-right:48px;">
+                <button class="btn btn-ghost btn-sm" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);" onclick="toggleTokenVisibility()">👁</button>
+              </div>
+              <p class="form-hint">需要 <code>repo</code> 權限的 Fine-grained Token。<a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:var(--accent-blue);">點此產生 →</a></p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">分支名稱</label>
+              <input class="form-input" id="gh-branch" value="main" oninput="saveGitHubSettings()">
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header"><h3>連線測試</h3></div>
+          <div class="card-body">
+            <button class="btn btn-primary" onclick="testGitHubConnection()">🔌 測試連線</button>
+            <div id="gh-test-result" style="margin-top: 12px;"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header"><h3>推送 config.json</h3></div>
+          <div class="card-body">
+            <p style="font-size:14px;color:var(--text-secondary);margin-bottom:14px;">
+              點擊下方按鈕，將目前的設定直接寫入 GitHub 倉庫的 <code>config.json</code>。<br>
+              GitHub Pages 會在 1-2 分鐘內自動更新你的網站。
+            </p>
+            <button class="btn btn-primary btn-lg" onclick="pushToGitHub()">🚀 推送到 GitHub</button>
+            <div id="gh-push-result" style="margin-top: 12px;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>📖 如何取得 Token？</h3></div>
+          <div class="card-body" style="font-size:14px;color:var(--text-secondary);line-height:1.8;">
+            <ol style="padding-left:20px;">
+              <li>前往 <a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:var(--accent-blue);">GitHub Token 設定頁面</a></li>
+              <li>點擊「<b>Generate new token</b>」</li>
+              <li>輸入名稱（例如「學習平台管理」）</li>
+              <li>Repository access 選「<b>Only select repositories</b>」→ 選擇你的倉庫</li>
+              <li>Permissions → Repository permissions → Contents 設為「<b>Read and write</b>」</li>
+              <li>點擊「<b>Generate token</b>」並複製 Token</li>
+              <li>將 Token 貼入上方欄位即可</li>
+            </ol>
+            <p style="margin-top:12px;padding:10px 14px;background:var(--primary-pale);border-radius:8px;font-size:13px;">
+              ⚠️ Token 僅儲存在你的瀏覽器中（localStorage），不會傳送到任何第三方伺服器。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SETTINGS PAGE ==================== -->
+      <div class="page-panel" id="page-settings">
+        <div class="page-header">
+          <h2>⚙️ 網站設定</h2>
+          <p>設定網站名稱與歡迎訊息</p>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">網站名稱</label>
+              <input class="form-input" id="setting-siteName" placeholder="📚 互動學習平台"
+                oninput="updateSettings()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">歡迎訊息</label>
+              <textarea class="form-textarea" id="setting-welcomeMessage" rows="3"
+                placeholder="歡迎使用互動學習平台！"
+                oninput="updateSettings()"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== AUDIO DIALOG ===== -->
+  <div class="dialog-overlay" id="dialog-audio">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h3 id="dialog-audio-title">新增音檔</h3>
+        <button class="btn-ghost" onclick="closeDialog('audio')">✕</button>
+      </div>
+      <div class="dialog-body">
+        <div class="form-group">
+          <label class="form-label">ID（辨識碼）</label>
+          <input class="form-input" id="audio-id" placeholder="lesson01">
+          <p class="form-hint">QR Code 可掃描此 ID 來播放音檔，建議用英文與數字</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">名稱</label>
+          <input class="form-input" id="audio-name" placeholder="第一課 我的家人">
+        </div>
+        <div class="form-group">
+          <label class="form-label">檔案路徑</label>
+          <input class="form-input" id="audio-file" placeholder="audio/lesson01.mp3">
+          <p class="form-hint">相對於網站根目錄的路徑</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">說明（選填）</label>
+          <input class="form-input" id="audio-desc" placeholder="國語課文朗讀">
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-outline" onclick="closeDialog('audio')">取消</button>
+        <button class="btn btn-primary" id="btn-save-audio" onclick="saveAudio()">新增</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BOOK DIALOG ===== -->
+  <div class="dialog-overlay" id="dialog-book">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h3 id="dialog-book-title">新增書籍</h3>
+        <button class="btn-ghost" onclick="closeDialog('book')">✕</button>
+      </div>
+      <div class="dialog-body">
+        <div class="form-group">
+          <label class="form-label">ID</label>
+          <input class="form-input" id="book-id" placeholder="book01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">書名</label>
+          <input class="form-input" id="book-title" placeholder="國語課本第一冊">
+        </div>
+        <div class="form-group">
+          <label class="form-label">封面圖片路徑</label>
+          <input class="form-input" id="book-cover" placeholder="books/book01/cover.jpg">
+        </div>
+        <div class="form-group">
+          <label class="form-label">說明（選填）</label>
+          <input class="form-input" id="book-desc" placeholder="三年級上學期國語">
+        </div>
+        <div class="form-group">
+          <label class="form-label">頁面圖片路徑</label>
+          <div class="pages-list" id="book-pages-list"></div>
+          <div class="add-page-row">
+            <input class="form-input" id="book-page-input" placeholder="books/book01/page01.jpg">
+            <button class="btn btn-outline btn-sm" onclick="addBookPage()">加入</button>
+          </div>
+          <p class="form-hint" style="margin-top: 6px;">
+            💡 可用範圍格式快速加入，例如：<code>books/book01/page[01-20].jpg</code>
+          </p>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-outline" onclick="closeDialog('book')">取消</button>
+        <button class="btn btn-primary" id="btn-save-book" onclick="saveBook()">新增</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WORKSHEET DIALOG ===== -->
+  <div class="dialog-overlay" id="dialog-worksheet">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h3 id="dialog-worksheet-title">新增學習單</h3>
+        <button class="btn-ghost" onclick="closeDialog('worksheet')">✕</button>
+      </div>
+      <div class="dialog-body">
+        <div class="form-group">
+          <label class="form-label">ID</label>
+          <input class="form-input" id="ws-id" placeholder="ws01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">標題</label>
+          <input class="form-input" id="ws-title" placeholder="第一課生字練習">
+        </div>
+        <div class="form-group">
+          <label class="form-label">檔案路徑</label>
+          <input class="form-input" id="ws-file" placeholder="worksheets/vocab01.pdf">
+        </div>
+        <div class="form-group">
+          <label class="form-label">說明（選填）</label>
+          <input class="form-input" id="ws-desc" placeholder="生字筆順與造詞練習">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">年級</label>
+            <select class="form-select" id="ws-grade">
+              <option value="">請選擇</option>
+              <option>一年級</option><option>二年級</option>
+              <option>三年級</option><option>四年級</option>
+              <option>五年級</option><option>六年級</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">科目</label>
+            <select class="form-select" id="ws-subject">
+              <option value="">請選擇</option>
+              <option>國語</option><option>數學</option>
+              <option>英語</option><option>自然</option>
+              <option>社會</option><option>其他</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-outline" onclick="closeDialog('worksheet')">取消</button>
+        <button class="btn btn-primary" id="btn-save-ws" onclick="saveWorksheet()">新增</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    /* ====================================================================
+       DATA STORE
+    ==================================================================== */
+    let data = {
+      siteName: '📚 互動學習平台',
+      welcomeMessage: '歡迎使用互動學習平台！掃描 QR Code 即可聆聽音檔。',
+      audioFiles: [],
+      books: [],
+      worksheets: []
+    };
+
+    // Load from localStorage
+    const saved = localStorage.getItem('learning-platform-data');
+    if (saved) {
+      try { data = JSON.parse(saved); } catch(e) {}
+    }
+
+    function persist() {
+      localStorage.setItem('learning-platform-data', JSON.stringify(data));
+      updateBadges();
+    }
+
+    /* ====================================================================
+       NAVIGATION
+    ==================================================================== */
+    function showPage(page) {
+      document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const panel = document.getElementById('page-' + page);
+      if (panel) panel.classList.add('active');
+      const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
+      if (nav) nav.classList.add('active');
+
+      if (page === 'preview') renderJsonPreview();
+      if (page === 'qrcodes') generateAutoQR();
+      if (page === 'settings') loadSettings();
+      if (page === 'github') loadGitHubSettings();
+
+      // Close mobile sidebar
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('open');
+    }
+
+    /* ====================================================================
+       BADGES
+    ==================================================================== */
+    function updateBadges() {
+      document.getElementById('badge-audio').textContent = data.audioFiles.length;
+      document.getElementById('badge-books').textContent = data.books.length;
+      document.getElementById('badge-worksheets').textContent = data.worksheets.length;
+    }
+
+    /* ====================================================================
+       DIALOG HELPERS
+    ==================================================================== */
+    let editIndex = -1;
+
+    function openDialog(type) { document.getElementById('dialog-' + type).classList.add('open'); }
+    function closeDialog(type) {
+      document.getElementById('dialog-' + type).classList.remove('open');
+      editIndex = -1;
+    }
+
+    /* ====================================================================
+       AUDIO CRUD
+    ==================================================================== */
+    function renderAudioList() {
+      const el = document.getElementById('audio-list');
+      if (data.audioFiles.length === 0) {
+        el.innerHTML = `<div class="empty-state">
+          <span class="empty-icon">🔊</span>
+          <h3>尚無音檔</h3>
+          <p>點擊上方「新增音檔」按鈕來加入第一筆資料</p>
+        </div>`;
+        return;
+      }
+      el.innerHTML = '<ul class="item-list">' + data.audioFiles.map((a, i) => `
+        <li class="item-row">
+          <div class="item-icon audio">🔊</div>
+          <div class="item-info">
+            <div class="item-name">${esc(a.name || a.id)}</div>
+            <div class="item-meta">${esc(a.file)} &nbsp;·&nbsp; ID: ${esc(a.id)}</div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-ghost btn-sm" onclick="editAudio(${i})" title="編輯">✏️</button>
+            <button class="btn btn-danger-ghost btn-sm" onclick="deleteAudio(${i})" title="刪除">🗑</button>
+          </div>
+        </li>
+      `).join('') + '</ul>';
+    }
+
+    function openAudioDialog(idx) {
+      editIndex = idx !== undefined ? idx : -1;
+      const isEdit = editIndex >= 0;
+      document.getElementById('dialog-audio-title').textContent = isEdit ? '編輯音檔' : '新增音檔';
+      document.getElementById('btn-save-audio').textContent = isEdit ? '儲存' : '新增';
+      const a = isEdit ? data.audioFiles[editIndex] : { id: '', name: '', file: '', description: '' };
+      document.getElementById('audio-id').value = a.id;
+      document.getElementById('audio-name').value = a.name;
+      document.getElementById('audio-file').value = a.file;
+      document.getElementById('audio-desc').value = a.description || '';
+      // Auto-generate ID suggestion
+      if (!isEdit) {
+        const num = String(data.audioFiles.length + 1).padStart(2, '0');
+        document.getElementById('audio-id').value = 'lesson' + num;
+        document.getElementById('audio-file').value = 'audio/lesson' + num + '.mp3';
+      }
+      openDialog('audio');
+    }
+
+    function saveAudio() {
+      const obj = {
+        id: document.getElementById('audio-id').value.trim(),
+        name: document.getElementById('audio-name').value.trim(),
+        file: document.getElementById('audio-file').value.trim(),
+        description: document.getElementById('audio-desc').value.trim()
+      };
+      if (!obj.id || !obj.name || !obj.file) return toast('請填寫 ID、名稱與檔案路徑', 'error');
+      if (editIndex >= 0) {
+        data.audioFiles[editIndex] = obj;
+        toast('已更新：' + obj.name, 'success');
+      } else {
+        data.audioFiles.push(obj);
+        toast('已新增：' + obj.name, 'success');
+      }
+      persist();
+      renderAudioList();
+      closeDialog('audio');
+    }
+
+    function editAudio(i) { openAudioDialog(i); }
+    function deleteAudio(i) {
+      if (!confirm('確定要刪除「' + data.audioFiles[i].name + '」？')) return;
+      data.audioFiles.splice(i, 1);
+      persist();
+      renderAudioList();
+      toast('已刪除', 'success');
+    }
+
+    /* ====================================================================
+       BOOKS CRUD
+    ==================================================================== */
+    let tempPages = [];
+
+    function renderBooksList() {
+      const el = document.getElementById('books-list');
+      if (data.books.length === 0) {
+        el.innerHTML = `<div class="empty-state">
+          <span class="empty-icon">📖</span>
+          <h3>尚無書籍</h3>
+          <p>點擊上方「新增書籍」按鈕來加入</p>
+        </div>`;
+        return;
+      }
+      el.innerHTML = '<ul class="item-list">' + data.books.map((b, i) => `
+        <li class="item-row">
+          <div class="item-icon book">📖</div>
+          <div class="item-info">
+            <div class="item-name">${esc(b.title)}</div>
+            <div class="item-meta">${b.pages ? b.pages.length + ' 頁' : '0 頁'} &nbsp;·&nbsp; ID: ${esc(b.id)}</div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-ghost btn-sm" onclick="editBook(${i})">✏️</button>
+            <button class="btn btn-danger-ghost btn-sm" onclick="deleteBook(${i})">🗑</button>
+          </div>
+        </li>
+      `).join('') + '</ul>';
+    }
+
+    function openBookDialog(idx) {
+      editIndex = idx !== undefined ? idx : -1;
+      const isEdit = editIndex >= 0;
+      document.getElementById('dialog-book-title').textContent = isEdit ? '編輯書籍' : '新增書籍';
+      document.getElementById('btn-save-book').textContent = isEdit ? '儲存' : '新增';
+      const b = isEdit ? data.books[editIndex] : { id: '', title: '', cover: '', pages: [], description: '' };
+      document.getElementById('book-id').value = b.id;
+      document.getElementById('book-title').value = b.title;
+      document.getElementById('book-cover').value = b.cover || '';
+      document.getElementById('book-desc').value = b.description || '';
+      tempPages = [...(b.pages || [])];
+      if (!isEdit) {
+        const num = String(data.books.length + 1).padStart(2, '0');
+        document.getElementById('book-id').value = 'book' + num;
+        document.getElementById('book-cover').value = 'books/book' + num + '/cover.jpg';
+      }
+      renderTempPages();
+      openDialog('book');
+    }
+
+    function renderTempPages() {
+      const el = document.getElementById('book-pages-list');
+      if (tempPages.length === 0) {
+        el.innerHTML = '<span style="color:var(--text-muted);font-size:13px;padding:8px;">尚未加入頁面</span>';
+      } else {
+        el.innerHTML = tempPages.map((p, i) =>
+          `<span class="page-chip">${esc(p.split('/').pop())}
+            <button class="page-chip-remove" onclick="removeTempPage(${i})">✕</button>
+          </span>`
+        ).join('');
+      }
+    }
+
+    function addBookPage() {
+      const input = document.getElementById('book-page-input');
+      let val = input.value.trim();
+      if (!val) return;
+
+      // Support range syntax: page[01-20].jpg
+      const rangeMatch = val.match(/^(.+)\[(\d+)-(\d+)\](.+)$/);
+      if (rangeMatch) {
+        const prefix = rangeMatch[1];
+        const start = parseInt(rangeMatch[2]);
+        const end = parseInt(rangeMatch[3]);
+        const suffix = rangeMatch[4];
+        const padLen = rangeMatch[2].length;
+        for (let n = start; n <= end; n++) {
+          tempPages.push(prefix + String(n).padStart(padLen, '0') + suffix);
+        }
+        toast(`已加入 ${end - start + 1} 頁`, 'success');
+      } else {
+        tempPages.push(val);
+      }
+
+      input.value = '';
+      renderTempPages();
+    }
+
+    // Allow Enter key to add page
+    document.getElementById('book-page-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); addBookPage(); }
+    });
+
+    function removeTempPage(i) {
+      tempPages.splice(i, 1);
+      renderTempPages();
+    }
+
+    function saveBook() {
+      const obj = {
+        id: document.getElementById('book-id').value.trim(),
+        title: document.getElementById('book-title').value.trim(),
+        cover: document.getElementById('book-cover').value.trim(),
+        pages: [...tempPages],
+        description: document.getElementById('book-desc').value.trim()
+      };
+      if (!obj.id || !obj.title) return toast('請填寫 ID 與書名', 'error');
+      if (editIndex >= 0) {
+        data.books[editIndex] = obj;
+        toast('已更新：' + obj.title, 'success');
+      } else {
+        data.books.push(obj);
+        toast('已新增：' + obj.title, 'success');
+      }
+      persist();
+      renderBooksList();
+      closeDialog('book');
+    }
+
+    function editBook(i) { openBookDialog(i); }
+    function deleteBook(i) {
+      if (!confirm('確定要刪除「' + data.books[i].title + '」？')) return;
+      data.books.splice(i, 1);
+      persist();
+      renderBooksList();
+      toast('已刪除', 'success');
+    }
+
+    /* ====================================================================
+       WORKSHEETS CRUD
+    ==================================================================== */
+    function renderWorksheetsList() {
+      const el = document.getElementById('worksheets-list');
+      if (data.worksheets.length === 0) {
+        el.innerHTML = `<div class="empty-state">
+          <span class="empty-icon">📝</span>
+          <h3>尚無學習單</h3>
+          <p>點擊上方「新增學習單」按鈕來加入</p>
+        </div>`;
+        return;
+      }
+      el.innerHTML = '<ul class="item-list">' + data.worksheets.map((w, i) => `
+        <li class="item-row">
+          <div class="item-icon worksheet">📄</div>
+          <div class="item-info">
+            <div class="item-name">${esc(w.title)}</div>
+            <div class="item-meta">${esc(w.file)} ${w.grade ? '·' + w.grade : ''} ${w.subject ? '·' + w.subject : ''}</div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-ghost btn-sm" onclick="editWorksheet(${i})">✏️</button>
+            <button class="btn btn-danger-ghost btn-sm" onclick="deleteWorksheet(${i})">🗑</button>
+          </div>
+        </li>
+      `).join('') + '</ul>';
+    }
+
+    function openWorksheetDialog(idx) {
+      editIndex = idx !== undefined ? idx : -1;
+      const isEdit = editIndex >= 0;
+      document.getElementById('dialog-worksheet-title').textContent = isEdit ? '編輯學習單' : '新增學習單';
+      document.getElementById('btn-save-ws').textContent = isEdit ? '儲存' : '新增';
+      const w = isEdit ? data.worksheets[editIndex] : { id:'', title:'', file:'', description:'', grade:'', subject:'' };
+      document.getElementById('ws-id').value = w.id;
+      document.getElementById('ws-title').value = w.title;
+      document.getElementById('ws-file').value = w.file;
+      document.getElementById('ws-desc').value = w.description || '';
+      document.getElementById('ws-grade').value = w.grade || '';
+      document.getElementById('ws-subject').value = w.subject || '';
+      if (!isEdit) {
+        const num = String(data.worksheets.length + 1).padStart(2, '0');
+        document.getElementById('ws-id').value = 'ws' + num;
+      }
+      openDialog('worksheet');
+    }
+
+    function saveWorksheet() {
+      const obj = {
+        id: document.getElementById('ws-id').value.trim(),
+        title: document.getElementById('ws-title').value.trim(),
+        file: document.getElementById('ws-file').value.trim(),
+        description: document.getElementById('ws-desc').value.trim(),
+        grade: document.getElementById('ws-grade').value,
+        subject: document.getElementById('ws-subject').value
+      };
+      if (!obj.id || !obj.title || !obj.file) return toast('請填寫 ID、標題與檔案路徑', 'error');
+      if (editIndex >= 0) {
+        data.worksheets[editIndex] = obj;
+        toast('已更新：' + obj.title, 'success');
+      } else {
+        data.worksheets.push(obj);
+        toast('已新增：' + obj.title, 'success');
+      }
+      persist();
+      renderWorksheetsList();
+      closeDialog('worksheet');
+    }
+
+    function editWorksheet(i) { openWorksheetDialog(i); }
+    function deleteWorksheet(i) {
+      if (!confirm('確定要刪除「' + data.worksheets[i].title + '」？')) return;
+      data.worksheets.splice(i, 1);
+      persist();
+      renderWorksheetsList();
+      toast('已刪除', 'success');
+    }
+
+    /* ====================================================================
+       QR CODE GENERATION
+    ==================================================================== */
+    function setQrMode(mode) {
+      document.querySelectorAll('.section-tab').forEach((t, i) => {
+        t.classList.toggle('active', (mode === 'auto' && i === 0) || (mode === 'custom' && i === 1));
+      });
+      document.getElementById('qr-auto').style.display = mode === 'auto' ? 'block' : 'none';
+      document.getElementById('qr-custom').style.display = mode === 'custom' ? 'block' : 'none';
+      if (mode === 'auto') generateAutoQR();
+    }
+
+    function generateAutoQR() {
+      const grid = document.getElementById('qr-auto-grid');
+      grid.innerHTML = '';
+      if (data.audioFiles.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+          <span class="empty-icon">🏷</span>
+          <h3>尚無音檔</h3>
+          <p>請先到「音檔管理」頁面新增音檔</p>
+        </div>`;
+        return;
+      }
+      data.audioFiles.forEach(a => {
+        createQRCard(grid, a.id, a.name);
+      });
+    }
+
+    function generateCustomQR() {
+      const input = document.getElementById('custom-qr-input').value.trim();
+      if (!input) return toast('請輸入資料', 'error');
+      const grid = document.getElementById('qr-custom-grid');
+      grid.innerHTML = '';
+      input.split('\n').filter(Boolean).forEach(line => {
+        const parts = line.split(',').map(s => s.trim());
+        createQRCard(grid, parts[0], parts[1] || parts[0]);
+      });
+    }
+
+    function createQRCard(container, content, label) {
+      const card = document.createElement('div');
+      card.className = 'qr-card';
+      const qrDiv = document.createElement('div');
+      card.appendChild(qrDiv);
+      new QRCode(qrDiv, { text: content, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
+      card.innerHTML += `<div class="qr-label">${esc(label)}</div>
+        <div class="qr-sublabel">${esc(content)}</div>`;
+      container.appendChild(card);
+    }
+
+    function downloadAllQR() {
+      const cards = document.querySelectorAll('.page-panel.active .qr-card');
+      if (cards.length === 0) return toast('沒有可下載的 QR Code', 'error');
+      cards.forEach((card, i) => {
+        const canvas = card.querySelector('canvas');
+        const label = card.querySelector('.qr-label')?.textContent || i;
+        if (canvas) {
+          const link = document.createElement('a');
+          link.download = `qrcode-${label}.png`;
+          link.href = canvas.toDataURL();
+          link.click();
+        }
+      });
+      toast('已下載 ' + cards.length + ' 張 QR Code', 'success');
+    }
+
+    /* ====================================================================
+       CONFIG JSON OUTPUT
+    ==================================================================== */
+    function buildConfig() {
+      return {
+        siteName: data.siteName,
+        welcomeMessage: data.welcomeMessage,
+        audioFiles: data.audioFiles.map(a => {
+          const obj = { id: a.id, name: a.name, file: a.file };
+          if (a.description) obj.description = a.description;
+          return obj;
+        }),
+        books: data.books.map(b => {
+          const obj = { id: b.id, title: b.title };
+          if (b.cover) obj.cover = b.cover;
+          obj.pages = b.pages || [];
+          if (b.description) obj.description = b.description;
+          return obj;
+        }),
+        worksheets: data.worksheets.map(w => {
+          const obj = { id: w.id, title: w.title, file: w.file };
+          if (w.description) obj.description = w.description;
+          if (w.grade) obj.grade = w.grade;
+          if (w.subject) obj.subject = w.subject;
+          return obj;
+        })
+      };
+    }
+
+    function renderJsonPreview() {
+      const json = JSON.stringify(buildConfig(), null, 2);
+      // Syntax highlight
+      const highlighted = json
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"([^"]+)"(?=\s*:)/g, '"<span class="json-key">$1</span>"')
+        .replace(/:\s*"([^"]*)"/g, ': "<span class="json-string">$1</span>"')
+        .replace(/:\s*(\d+)/g, ': <span class="json-number">$1</span>');
+      document.getElementById('json-preview').innerHTML = highlighted;
+    }
+
+    function downloadConfig() {
+      const json = JSON.stringify(buildConfig(), null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'config.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('config.json 已下載', 'success');
+    }
+
+    function copyConfig() {
+      const json = JSON.stringify(buildConfig(), null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        toast('已複製到剪貼簿', 'success');
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = json;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast('已複製到剪貼簿', 'success');
+      });
+    }
+
+    /* ====================================================================
+       IMPORT
+    ==================================================================== */
+    function importConfig(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          data.siteName = imported.siteName || data.siteName;
+          data.welcomeMessage = imported.welcomeMessage || data.welcomeMessage;
+          data.audioFiles = imported.audioFiles || [];
+          data.books = imported.books || [];
+          data.worksheets = imported.worksheets || [];
+          persist();
+          renderAll();
+          toast('匯入成功！共 ' + data.audioFiles.length + ' 音檔、' +
+            data.books.length + ' 書籍、' + data.worksheets.length + ' 學習單', 'success');
+        } catch(err) {
+          toast('JSON 格式錯誤：' + err.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+      input.value = '';
+    }
+
+    // Drag & drop
+    const dropZone = document.getElementById('drop-zone');
+    ['dragenter','dragover'].forEach(evt => {
+      dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    });
+    ['dragleave','drop'].forEach(evt => {
+      dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+    });
+    dropZone.addEventListener('drop', e => {
+      const file = e.dataTransfer.files[0];
+      if (file && file.name.endsWith('.json')) {
+        const fakeInput = { files: [file], value: 'x' };
+        importConfig(fakeInput);
+      } else {
+        toast('請拖入 .json 檔案', 'error');
+      }
+    });
+
+    function clearAll() {
+      if (!confirm('確定要清除所有資料？此操作無法復原。')) return;
+      data = {
+        siteName: '📚 互動學習平台',
+        welcomeMessage: '歡迎使用互動學習平台！',
+        audioFiles: [],
+        books: [],
+        worksheets: []
+      };
+      persist();
+      renderAll();
+      toast('已清除所有資料', 'success');
+    }
+
+    /* ====================================================================
+       SETTINGS
+    ==================================================================== */
+    function loadSettings() {
+      document.getElementById('setting-siteName').value = data.siteName;
+      document.getElementById('setting-welcomeMessage').value = data.welcomeMessage;
+    }
+
+    function updateSettings() {
+      data.siteName = document.getElementById('setting-siteName').value;
+      data.welcomeMessage = document.getElementById('setting-welcomeMessage').value;
+      persist();
+    }
+
+    /* ====================================================================
+       GITHUB INTEGRATION
+    ==================================================================== */
+    function getGitHubSettings() {
+      try {
+        return JSON.parse(localStorage.getItem('gh-settings') || '{}');
+      } catch(e) { return {}; }
+    }
+
+    function saveGitHubSettings() {
+      const settings = {
+        owner: document.getElementById('gh-owner').value.trim(),
+        repo: document.getElementById('gh-repo').value.trim(),
+        token: document.getElementById('gh-token').value.trim(),
+        branch: document.getElementById('gh-branch').value.trim() || 'main'
+      };
+      localStorage.setItem('gh-settings', JSON.stringify(settings));
+      updateGitHubBadge();
+    }
+
+    function loadGitHubSettings() {
+      const s = getGitHubSettings();
+      const ownerEl = document.getElementById('gh-owner');
+      const repoEl = document.getElementById('gh-repo');
+      const tokenEl = document.getElementById('gh-token');
+      const branchEl = document.getElementById('gh-branch');
+      if (ownerEl) ownerEl.value = s.owner || '';
+      if (repoEl) repoEl.value = s.repo || '';
+      if (tokenEl) tokenEl.value = s.token || '';
+      if (branchEl) branchEl.value = s.branch || 'main';
+      updateGitHubBadge();
+    }
+
+    function updateGitHubBadge() {
+      const s = getGitHubSettings();
+      const badge = document.getElementById('badge-github');
+      if (s.owner && s.repo && s.token) {
+        badge.textContent = '🟢';
+        badge.title = '已設定';
+      } else {
+        badge.textContent = '⚪';
+        badge.title = '未設定';
+      }
+    }
+
+    function toggleTokenVisibility() {
+      const input = document.getElementById('gh-token');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    async function testGitHubConnection() {
+      const s = getGitHubSettings();
+      const resultEl = document.getElementById('gh-test-result');
+      if (!s.owner || !s.repo || !s.token) {
+        resultEl.innerHTML = '<span style="color:var(--danger);">❌ 請先填寫帳號、倉庫名稱與 Token</span>';
+        return;
+      }
+      resultEl.innerHTML = '<span style="color:var(--text-muted);">🔄 測試連線中...</span>';
+      try {
+        const resp = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}`, {
+          headers: { 'Authorization': `Bearer ${s.token}`, 'Accept': 'application/vnd.github+json' }
+        });
+        if (resp.ok) {
+          const repo = await resp.json();
+          resultEl.innerHTML = `<span style="color:var(--accent-green);">✅ 連線成功！</span>
+            <div style="margin-top:8px;padding:12px;background:var(--accent-green-pale);border-radius:8px;font-size:13px;">
+              <b>倉庫：</b>${esc(repo.full_name)}<br>
+              <b>網站：</b>${repo.has_pages ? `<a href="https://${s.owner}.github.io/${s.repo}/" target="_blank" style="color:var(--accent-blue);">https://${s.owner}.github.io/${s.repo}/</a>` : '尚未啟用 GitHub Pages'}<br>
+              <b>權限：</b>${repo.permissions?.push ? '✅ 可推送' : '❌ 無推送權限'}
+            </div>`;
+        } else if (resp.status === 401) {
+          resultEl.innerHTML = '<span style="color:var(--danger);">❌ Token 無效或已過期，請重新產生</span>';
+        } else if (resp.status === 404) {
+          resultEl.innerHTML = '<span style="color:var(--danger);">❌ 找不到倉庫，請確認帳號與倉庫名稱</span>';
+        } else {
+          resultEl.innerHTML = `<span style="color:var(--danger);">❌ 錯誤 (${resp.status}): ${(await resp.json()).message || ''}</span>`;
+        }
+      } catch(e) {
+        resultEl.innerHTML = `<span style="color:var(--danger);">❌ 網路錯誤：${e.message}</span>`;
+      }
+    }
+
+    async function pushToGitHub() {
+      const s = getGitHubSettings();
+      if (!s.owner || !s.repo || !s.token) {
+        toast('請先到「GitHub 連線」頁面設定帳號與 Token', 'error');
+        showPage('github');
+        return;
+      }
+
+      const pushResultEl = document.getElementById('gh-push-result');
+      const configJson = JSON.stringify(buildConfig(), null, 2);
+      const contentBase64 = btoa(unescape(encodeURIComponent(configJson)));
+
+      toast('🔄 正在推送到 GitHub...', '');
+      if (pushResultEl) pushResultEl.innerHTML = '<span style="color:var(--text-muted);">🔄 推送中...</span>';
+
+      try {
+        // Step 1: Get current file SHA (needed for update)
+        let sha = null;
+        const getResp = await fetch(
+          `https://api.github.com/repos/${s.owner}/${s.repo}/contents/config.json?ref=${s.branch}`,
+          { headers: { 'Authorization': `Bearer ${s.token}`, 'Accept': 'application/vnd.github+json' } }
+        );
+        if (getResp.ok) {
+          const fileData = await getResp.json();
+          sha = fileData.sha;
+        }
+
+        // Step 2: Create or update file
+        const body = {
+          message: '📝 更新 config.json（從管理工具推送）',
+          content: contentBase64,
+          branch: s.branch
+        };
+        if (sha) body.sha = sha;
+
+        const putResp = await fetch(
+          `https://api.github.com/repos/${s.owner}/${s.repo}/contents/config.json`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${s.token}`,
+              'Accept': 'application/vnd.github+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+          }
+        );
+
+        if (putResp.ok || putResp.status === 201) {
+          const result = await putResp.json();
+          const commitUrl = result.commit?.html_url || '';
+          toast('✅ 推送成功！網站將在 1-2 分鐘內更新', 'success');
+          if (pushResultEl) {
+            pushResultEl.innerHTML = `<span style="color:var(--accent-green);">✅ 推送成功！</span>
+              <div style="margin-top:8px;padding:12px;background:var(--accent-green-pale);border-radius:8px;font-size:13px;">
+                ${commitUrl ? `<a href="${commitUrl}" target="_blank" style="color:var(--accent-blue);">查看 Commit →</a><br>` : ''}
+                <span style="color:var(--text-muted);">GitHub Pages 將在 1-2 分鐘內自動更新</span>
+              </div>`;
+          }
+        } else {
+          const errData = await putResp.json();
+          toast('❌ 推送失敗：' + (errData.message || putResp.status), 'error');
+          if (pushResultEl) pushResultEl.innerHTML = `<span style="color:var(--danger);">❌ ${esc(errData.message || '推送失敗')}</span>`;
+        }
+      } catch(e) {
+        toast('❌ 網路錯誤：' + e.message, 'error');
+        if (pushResultEl) pushResultEl.innerHTML = `<span style="color:var(--danger);">❌ ${esc(e.message)}</span>`;
+      }
+    }
+
+    /* ====================================================================
+       UTILITIES
+    ==================================================================== */
+    function esc(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function toast(msg, type) {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className = 'toast-msg' + (type ? ' ' + type : '');
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+    }
+
+    /* ====================================================================
+       INIT
+    ==================================================================== */
+    function renderAll() {
+      renderAudioList();
+      renderBooksList();
+      renderWorksheetsList();
+      updateBadges();
+    }
+
+    renderAll();
+    updateGitHubBadge();
+  </script>
+</body>
+</html>
