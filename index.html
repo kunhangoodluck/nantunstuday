@@ -239,6 +239,7 @@
     var playHistory = [], currentBook = null, currentPageIndex = 0;
     var consentDone = false, lastScanTime = 0;
     var globalAudio = new Audio();
+    var audioCtx = null;
     var dom = {};
 
     function cacheDom() {
@@ -277,10 +278,26 @@
     function handleConsent() {
       if (consentDone) return;
       consentDone = true;
+
+      // ★ 核心修正：建立 AudioContext 並將 globalAudio 接上去
+      // AudioContext 在使用者手勢中 resume 後就永久解鎖
+      // 透過 createMediaElementSource 把 Audio 元件路由到已解鎖的管線
+      // 之後即使換 src，因為走的是 AudioContext 管線，所以不會被擋
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var source = audioCtx.createMediaElementSource(globalAudio);
+        source.connect(audioCtx.destination);
+        audioCtx.resume();
+      } catch(e) {
+        console.warn('AudioContext 建立失敗:', e);
+      }
+
+      // 同時也用傳統方式解鎖 Audio 元件（雙重保險）
       try {
         globalAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
         globalAudio.play().then(function(){ globalAudio.pause(); }).catch(function(){});
       } catch(e) {}
+
       startScanner();
       dom.consentScreen.classList.add('hidden');
       setTimeout(function(){ dom.consentScreen.style.display = 'none'; }, 400);
@@ -350,16 +367,33 @@
     globalAudio.addEventListener('error', function(){ showToast('⚠️ 音檔載入失敗'); });
 
     function playAudio(url, name) {
+      // 確保 AudioContext 是活躍的
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
       globalAudio.pause();
       globalAudio.src = url;
+      globalAudio.load(); // 明確載入新音源
+
       dom.audioTitle.textContent = name || '正在播放';
       dom.audioFileName.textContent = url;
       dom.audioPlayer.classList.add('visible');
-      globalAudio.play().catch(function(e){ console.error('play:', e); showToast('⚠️ 播放失敗，請點擊播放鈕重試'); });
+
+      globalAudio.play().catch(function(e) {
+        console.error('自動播放失敗:', e);
+        // 如果自動播放被擋，提示使用者手動點擊
+        showToast('請點擊播放鈕 ▶ 開始播放');
+      });
+
       addToHistory(name || url, url);
     }
 
-    function togglePlay() { if (globalAudio.paused) globalAudio.play(); else globalAudio.pause(); }
+    function togglePlay() {
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (globalAudio.paused) globalAudio.play();
+      else globalAudio.pause();
+    }
 
     function seekFromEvent(e) {
       if (!globalAudio.duration) return;
