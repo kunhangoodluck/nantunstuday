@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -25,592 +26,135 @@
       --radius: 16px;
       --radius-sm: 10px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    /* Critical mobile fix: remove 300ms tap delay on all interactive elements */
-    button, a, [onclick], .book-card, .history-item, .tab-btn, .btn-consent, .btn-play, .btn-nav, .btn-close-modal, .btn-download {
+    button, a, [onclick], .book-card, .history-item, .tab-btn,
+    .btn-consent, .btn-play, .btn-nav, .btn-close-modal, .btn-download {
       touch-action: manipulation;
       -webkit-touch-callout: none;
       cursor: pointer;
     }
-
     body {
       font-family: 'Noto Sans TC', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       min-height: 100vh;
       -webkit-tap-highlight-color: transparent;
     }
-
-    /* ===== CONSENT SCREEN ===== */
     #consent-screen {
       position: fixed; inset: 0;
       background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 40%, #FFA96B 100%);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.5s, transform 0.5s;
+      z-index: 1000; transition: opacity 0.4s, transform 0.4s;
     }
-    #consent-screen.hidden {
-      opacity: 0; transform: scale(1.05);
-      pointer-events: none;
-    }
+    #consent-screen.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
     .consent-box {
-      background: white;
-      border-radius: 24px;
-      padding: 48px 36px;
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
+      background: white; border-radius: 24px; padding: 48px 36px;
+      max-width: 420px; width: 90%; text-align: center;
       box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      animation: slideUp 0.6s ease-out;
+      animation: slideUp 0.5s ease-out;
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .consent-icon {
-      font-size: 64px;
-      margin-bottom: 16px;
-      display: block;
-    }
-    .consent-box h1 {
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--secondary);
-      margin-bottom: 12px;
-    }
-    .consent-box p {
-      font-size: 15px;
-      color: var(--text-light);
-      line-height: 1.7;
-      margin-bottom: 28px;
-    }
-    .consent-features {
-      display: flex; gap: 8px; justify-content: center;
-      flex-wrap: wrap; margin-bottom: 28px;
-    }
-    .consent-features span {
-      background: var(--primary-pale);
-      color: var(--primary);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 6px 14px;
-      border-radius: 20px;
-    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+    .consent-icon { font-size: 64px; margin-bottom: 16px; display: block; }
+    .consent-box h1 { font-size: 26px; font-weight: 900; color: var(--secondary); margin-bottom: 12px; }
+    .consent-box p { font-size: 15px; color: var(--text-light); line-height: 1.7; margin-bottom: 28px; }
+    .consent-features { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+    .consent-features span { background: var(--primary-pale); color: var(--primary); font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 20px; }
     .btn-consent {
       background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: white;
-      border: none;
-      padding: 16px 48px;
-      font-size: 18px;
-      font-weight: 700;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      font-family: inherit;
-      box-shadow: 0 4px 20px rgba(255,107,53,0.4);
+      color: white; border: none; padding: 16px 48px; font-size: 18px; font-weight: 700;
+      border-radius: 50px; font-family: inherit; box-shadow: 0 4px 20px rgba(255,107,53,0.4); transition: transform 0.15s;
     }
-    .btn-consent:active {
-      transform: scale(0.97);
-    }
-
-    /* ===== HEADER ===== */
-    .app-header {
-      background: white;
-      padding: 16px 20px;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .header-inner {
-      max-width: 800px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .site-title {
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--secondary);
-    }
+    .btn-consent:active { transform: scale(0.96); }
+    .app-header { background: white; padding: 14px 20px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+    .header-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .site-title { font-size: 20px; font-weight: 900; color: var(--secondary); }
     .site-title span { color: var(--primary); }
-
-    /* ===== TAB NAV ===== */
-    .tab-nav {
-      display: flex;
-      background: white;
-      border-bottom: 2px solid var(--border);
-      position: sticky; top: 60px; z-index: 99;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 14px 8px;
-      border: none;
-      background: none;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-light);
-      cursor: pointer;
-      position: relative;
-      transition: color 0.25s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
+    .tab-nav { display: flex; background: white; border-bottom: 2px solid var(--border); position: sticky; z-index: 99; max-width: 800px; margin: 0 auto; }
+    .tab-btn { flex: 1; padding: 14px 8px; border: none; background: none; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--text-light); position: relative; transition: color 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .tab-btn .tab-icon { font-size: 20px; }
-    .tab-btn.active {
-      color: var(--primary);
-      font-weight: 700;
-    }
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px; left: 20%; right: 20%;
-      height: 3px;
-      background: var(--primary);
-      border-radius: 3px 3px 0 0;
-    }
-
-    /* ===== MAIN CONTENT ===== */
-    .main-content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px 16px 100px;
-    }
-    .tab-panel { display: none; animation: fadeIn 0.3s; }
-    .tab-panel.active { display: block; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ===== QR SCANNER TAB ===== */
-    .scanner-wrapper {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .scanner-header {
-      padding: 20px 20px 12px;
-    }
-    .scanner-header h2 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--secondary);
-      margin-bottom: 6px;
-    }
-    .scanner-header p {
-      font-size: 14px;
-      color: var(--text-light);
-    }
-    #qr-reader {
-      width: 100%;
-      aspect-ratio: 1;
-      max-height: 400px;
-      background: #1a1a2e;
-      position: relative;
-    }
+    .tab-btn.active { color: var(--primary); font-weight: 700; }
+    .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 20%; right: 20%; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0; }
+    .main-content { max-width: 800px; margin: 0 auto; padding: 20px 16px 100px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .scanner-wrapper { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; }
+    .scanner-header { padding: 20px 20px 12px; }
+    .scanner-header h2 { font-size: 20px; font-weight: 700; color: var(--secondary); margin-bottom: 6px; }
+    .scanner-header p { font-size: 14px; color: var(--text-light); }
+    #qr-reader { width: 100%; min-height: 280px; max-height: 400px; background: #1a1a2e; position: relative; }
     #qr-reader video { object-fit: cover; }
-    .scanner-status {
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-    .status-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: #ccc;
-      flex-shrink: 0;
-    }
-    .status-dot.scanning {
-      background: #22c55e;
-      animation: pulse 1.5s infinite;
-    }
-    .status-dot.found {
-      background: var(--primary);
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-      50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
-    }
-
-    /* Audio Player */
-    .audio-player {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
-      display: none;
-    }
-    .audio-player.visible { display: block; animation: fadeIn 0.3s; }
-    .audio-player-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--secondary);
-      margin-bottom: 4px;
-    }
-    .audio-player-file {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-bottom: 14px;
-      word-break: break-all;
-    }
-    .audio-controls {
-      display: flex; align-items: center; gap: 12px;
-    }
-    .btn-play {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 3px 12px rgba(255,107,53,0.3);
-    }
-    .progress-bar {
-      flex: 1; height: 6px;
-      background: var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .progress-fill {
-      height: 100%; width: 0%;
-      background: var(--primary);
-      border-radius: 3px;
-      transition: width 0.1s linear;
-    }
-    .audio-time {
-      font-size: 12px;
-      color: var(--text-light);
-      font-variant-numeric: tabular-nums;
-      min-width: 40px;
-      text-align: right;
-    }
-
-    /* Audio history */
-    .audio-history {
-      margin-top: 20px;
-    }
-    .audio-history h3 {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-light);
-      margin-bottom: 10px;
-    }
-    .history-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: var(--bg-card);
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+    .scanner-status { padding: 16px 20px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+    .status-dot.scanning { background: #22c55e; animation: pulse 1.5s infinite; }
+    .status-dot.found { background: var(--primary); }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
+    .audio-player { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; display: none; }
+    .audio-player.visible { display: block; animation: fadeIn 0.25s; }
+    .audio-player-title { font-size: 16px; font-weight: 700; color: var(--secondary); margin-bottom: 4px; }
+    .audio-player-file { font-size: 13px; color: var(--text-light); margin-bottom: 14px; word-break: break-all; }
+    .audio-controls { display: flex; align-items: center; gap: 12px; }
+    .btn-play { width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; font-size: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 12px rgba(255,107,53,0.3); }
+    .progress-bar { flex: 1; height: 24px; display: flex; align-items: center; cursor: pointer; position: relative; }
+    .progress-track { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 3px; transition: width 0.1s linear; }
+    .audio-time { font-size: 12px; color: var(--text-light); font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+    .audio-history { margin-top: 20px; }
+    .audio-history h3 { font-size: 15px; font-weight: 700; color: var(--text-light); margin-bottom: 10px; }
+    .history-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-card); border-radius: var(--radius-sm); margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: background 0.15s; }
     .history-item:active { background: var(--primary-pale); }
-    .history-icon {
-      width: 36px; height: 36px;
-      background: var(--primary-pale);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; flex-shrink: 0;
-    }
+    .history-icon { width: 36px; height: 36px; background: var(--primary-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
     .history-info { flex: 1; min-width: 0; }
-    .history-name {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .history-time {
-      font-size: 12px;
-      color: var(--text-light);
-    }
-
-    /* ===== BOOKS TAB ===== */
-    .book-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 16px;
-    }
-    .book-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .book-card:active {
-      transform: scale(0.98);
-    }
-    .book-cover {
-      width: 100%;
-      aspect-ratio: 3/4;
-      background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 48px;
-      object-fit: cover;
-    }
-    .book-cover img {
-      width: 100%; height: 100%; object-fit: cover;
-    }
-    .book-info {
-      padding: 12px 14px;
-    }
-    .book-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .book-desc {
-      font-size: 12px;
-      color: var(--text-light);
-    }
-    .book-pages-count {
-      font-size: 12px;
-      color: var(--primary);
-      font-weight: 500;
-      margin-top: 4px;
-    }
-
-    /* Book Viewer Modal */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 500;
-      display: none;
-      flex-direction: column;
-    }
+    .history-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-time { font-size: 12px; color: var(--text-light); }
+    .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+    .book-card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform 0.15s; }
+    .book-card:active { transform: scale(0.97); }
+    .book-cover { width: 100%; padding-top: 133%; background: linear-gradient(135deg, var(--secondary), var(--secondary-light)); position: relative; }
+    .book-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .book-cover-emoji { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .book-info { padding: 12px 14px; }
+    .book-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .book-desc { font-size: 12px; color: var(--text-light); }
+    .book-pages-count { font-size: 12px; color: var(--primary); font-weight: 500; margin-top: 4px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: none; flex-direction: column; }
     .modal-overlay.open { display: flex; }
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      color: white;
-    }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 700;
-    }
-    .modal-page-info {
-      font-size: 13px;
-      opacity: 0.7;
-    }
-    .btn-close-modal {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: white;
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .modal-body {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: auto;
-      padding: 8px;
-      position: relative;
-    }
-    .modal-body img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      border-radius: 4px;
-    }
-    .modal-nav {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      padding: 12px 16px 24px;
-    }
-    .btn-nav {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: white;
-      padding: 12px 28px;
-      border-radius: 50px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.2s;
-    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; color: white; }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-page-info { font-size: 13px; opacity: 0.7; }
+    .btn-close-modal { background: rgba(255,255,255,0.15); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; }
+    .modal-body { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 8px; }
+    .modal-body img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; }
+    .modal-nav { display: flex; justify-content: center; gap: 16px; padding: 12px 16px 24px; }
+    .btn-nav { background: rgba(255,255,255,0.15); border: none; color: white; padding: 12px 28px; border-radius: 50px; font-size: 15px; font-weight: 600; font-family: inherit; transition: background 0.15s; }
     .btn-nav:active { background: rgba(255,255,255,0.3); }
-    .btn-nav:disabled { opacity: 0.3; cursor: default; }
-
-    /* ===== WORKSHEETS TAB ===== */
-    .worksheet-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .worksheet-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      transition: transform 0.2s;
-    }
-    .worksheet-card:active { transform: scale(0.99); }
-    .ws-icon {
-      width: 48px; height: 48px;
-      background: var(--accent-light);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
+    .btn-nav:disabled { opacity: 0.3; }
+    .worksheet-list { display: flex; flex-direction: column; gap: 12px; }
+    .worksheet-card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+    .ws-icon { width: 48px; height: 48px; background: var(--accent-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
     .ws-info { flex: 1; min-width: 0; }
-    .ws-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-    .ws-meta {
-      font-size: 12px;
-      color: var(--text-light);
-    }
-    .ws-tags {
-      display: flex; gap: 6px; margin-top: 6px;
-    }
-    .ws-tag {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      background: var(--primary-pale);
-      color: var(--primary);
-      font-weight: 500;
-    }
-    .ws-tag.subject {
-      background: #E8F0FE;
-      color: #1a5fb4;
-    }
-    .btn-download {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    /* ===== EMPTY STATES ===== */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-light);
-    }
-    .empty-state .empty-icon {
-      font-size: 56px;
-      margin-bottom: 16px;
-      display: block;
-    }
-    .empty-state h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .empty-state p {
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    /* ===== SECTION HEADERS ===== */
-    .section-header {
-      margin-bottom: 16px;
-    }
-    .section-header h2 {
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--secondary);
-      margin-bottom: 4px;
-    }
-    .section-header p {
-      font-size: 14px;
-      color: var(--text-light);
-    }
-
-    /* ===== TOAST ===== */
-    .toast {
-      position: fixed;
-      bottom: 30px; left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--secondary);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: var(--shadow-lg);
-      z-index: 999;
-      transition: transform 0.3s ease;
-      pointer-events: none;
-    }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (min-width: 600px) {
-      .consent-box { padding: 56px 48px; }
-      .book-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-    }
-
-    /* Reduce motion */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-    /* Hide html5-qrcode UI elements we don't need */
-    #qr-reader__dashboard { display: none !important; }
-    #qr-reader__status_span { display: none !important; }
-    #qr-reader__header_message { display: none !important; }
-    #qr-reader img[alt="Info icon"] { display: none !important; }
-    #qr-reader a { display: none !important; }
-    #qr-reader__scan_region {
-      min-height: 0 !important;
-    }
-    #qr-reader__scan_region video {
-      border-radius: 0 !important;
-    }
+    .ws-title { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .ws-meta { font-size: 12px; color: var(--text-light); }
+    .ws-tags { display: flex; gap: 6px; margin-top: 6px; }
+    .ws-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--primary-pale); color: var(--primary); font-weight: 500; }
+    .ws-tag.subject { background: #E8F0FE; color: #1a5fb4; }
+    .btn-download { background: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; text-decoration: none; white-space: nowrap; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
+    .empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+    .empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .empty-state p { font-size: 14px; line-height: 1.6; }
+    .section-header { margin-bottom: 16px; }
+    .section-header h2 { font-size: 22px; font-weight: 900; color: var(--secondary); margin-bottom: 4px; }
+    .section-header p { font-size: 14px; color: var(--text-light); }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--secondary); color: white; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 999; transition: transform 0.3s ease; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    @media (min-width: 600px) { .consent-box { padding: 56px 48px; } .book-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    #qr-reader__dashboard, #qr-reader__status_span, #qr-reader__header_message, #qr-reader img[alt="Info icon"], #qr-reader a { display: none !important; }
+    #qr-reader__scan_region { min-height: 0 !important; }
+    #qr-reader__scan_region video { border-radius: 0 !important; }
   </style>
 </head>
 <body>
-
   <div id="consent-screen">
     <div class="consent-box">
       <span class="consent-icon">🎧</span>
@@ -621,31 +165,20 @@
         <span>🔊 自動播放</span>
         <span>📖 數位閱讀</span>
       </div>
-      <button class="btn-consent" id="btn-agree" onclick="handleConsent()">
-        同意並開始使用
-      </button>
+      <button class="btn-consent" id="btn-agree">同意並開始使用</button>
     </div>
   </div>
 
-  <header class="app-header">
+  <header class="app-header" id="app-header">
     <div class="header-inner">
       <div class="site-title" id="site-title">📚 互動<span>學習</span>平台</div>
     </div>
   </header>
 
   <nav class="tab-nav" id="tab-nav">
-    <button class="tab-btn active" data-tab="scanner" onclick="switchTab('scanner')">
-      <span class="tab-icon">📷</span>
-      掃描播放
-    </button>
-    <button class="tab-btn" data-tab="books" onclick="switchTab('books')">
-      <span class="tab-icon">📖</span>
-      數位書籍
-    </button>
-    <button class="tab-btn" data-tab="worksheets" onclick="switchTab('worksheets')">
-      <span class="tab-icon">📝</span>
-      學習單
-    </button>
+    <button class="tab-btn active" data-tab="scanner"><span class="tab-icon">📷</span>掃描播放</button>
+    <button class="tab-btn" data-tab="books"><span class="tab-icon">📖</span>數位書籍</button>
+    <button class="tab-btn" data-tab="worksheets"><span class="tab-icon">📝</span>學習單</button>
   </nav>
 
   <main class="main-content">
@@ -661,494 +194,306 @@
           <span id="status-text">準備中...</span>
         </div>
       </div>
-
       <div class="audio-player" id="audio-player">
         <div class="audio-player-title" id="audio-title">正在播放</div>
         <div class="audio-player-file" id="audio-file-name"></div>
         <div class="audio-controls">
-          <button class="btn-play" id="btn-play" onclick="togglePlay()">▶</button>
-          <div class="progress-bar" id="progress-bar" onclick="seek(event)">
-            <div class="progress-fill" id="progress-fill"></div>
+          <button class="btn-play" id="btn-play">▶</button>
+          <div class="progress-bar" id="progress-bar">
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
           </div>
           <span class="audio-time" id="audio-time">0:00</span>
         </div>
       </div>
-
       <div class="audio-history" id="audio-history" style="display:none;">
         <h3>📜 播放紀錄</h3>
         <div id="history-list"></div>
       </div>
     </div>
-
     <div class="tab-panel" id="panel-books">
-      <div class="section-header">
-        <h2>📖 數位書籍</h2>
-        <p>點擊書籍封面即可翻頁瀏覽</p>
-      </div>
+      <div class="section-header"><h2>📖 數位書籍</h2><p>點擊書籍封面即可翻頁瀏覽</p></div>
       <div class="book-grid" id="book-grid"></div>
     </div>
-
     <div class="tab-panel" id="panel-worksheets">
-      <div class="section-header">
-        <h2>📝 學習單下載</h2>
-        <p>點擊下載按鈕即可取得學習單</p>
-      </div>
+      <div class="section-header"><h2>📝 學習單下載</h2><p>點擊下載按鈕即可取得學習單</p></div>
       <div class="worksheet-list" id="worksheet-list"></div>
     </div>
   </main>
 
   <div class="modal-overlay" id="book-modal">
     <div class="modal-header">
-      <div>
-        <div class="modal-title" id="modal-book-title"></div>
-        <div class="modal-page-info" id="modal-page-info"></div>
-      </div>
-      <button class="btn-close-modal" onclick="closeBookModal()">✕</button>
+      <div><div class="modal-title" id="modal-book-title"></div><div class="modal-page-info" id="modal-page-info"></div></div>
+      <button class="btn-close-modal" id="btn-close-book">✕</button>
     </div>
-    <div class="modal-body">
-      <img id="modal-page-img" src="" alt="書頁">
-    </div>
+    <div class="modal-body"><img id="modal-page-img" src="" alt="書頁"></div>
     <div class="modal-nav">
-      <button class="btn-nav" id="btn-prev" onclick="prevPage()">◀ 上一頁</button>
-      <button class="btn-nav" id="btn-next" onclick="nextPage()">下一頁 ▶</button>
+      <button class="btn-nav" id="btn-prev">◀ 上一頁</button>
+      <button class="btn-nav" id="btn-next">下一頁 ▶</button>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    /* ========================================
-       GLOBAL STATE
-    ======================================== */
-    let config = null;
-    let scanner = null;
-    let isScanning = false;
-    let playHistory = [];
-    let currentBook = null;
-    let currentPageIndex = 0;
+    var config = null, scanner = null, isScanning = false;
+    var playHistory = [], currentBook = null, currentPageIndex = 0;
+    var consentDone = false, lastScanTime = 0;
+    var globalAudio = new Audio();
+    var dom = {};
 
-    // ✨ 建立唯一的全域 Audio 物件，解決手機限制
-    const globalAudio = new Audio();
+    function cacheDom() {
+      var ids = ['consent-screen','status-dot','status-text','audio-player','audio-title',
+        'audio-file-name','btn-play','progress-fill','progress-bar','audio-time',
+        'audio-history','history-list','book-grid','worksheet-list','book-modal',
+        'modal-page-img','modal-book-title','modal-page-info','btn-prev','btn-next',
+        'site-title','app-header','tab-nav','toast'];
+      var keys = ['consentScreen','statusDot','statusText','audioPlayer','audioTitle',
+        'audioFileName','btnPlay','progressFill','progressBar','audioTime',
+        'audioHistory','historyList','bookGrid','worksheetList','bookModal',
+        'modalImg','modalTitle','modalPageInfo','btnPrev','btnNext',
+        'siteTitle','header','tabNav','toast'];
+      for (var i = 0; i < ids.length; i++) {
+        dom[keys[i]] = document.getElementById(ids[i]);
+      }
+    }
 
-    /* ========================================
-       INITIALIZATION & AUDIO SETUP
-    ======================================== */
-    async function loadConfig() {
-      try {
-        const resp = await fetch('config.json?' + Date.now());
-        config = await resp.json();
+    function loadConfig() {
+      fetch('config.json?' + Date.now()).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function(d) {
+        config = d;
         if (config.siteName) {
-          document.getElementById('site-title').innerHTML =
-            config.siteName.replace(/學習/g, '<span>學習</span>');
+          dom.siteTitle.innerHTML = config.siteName.replace(/學習/g, '<span>學習</span>');
           document.title = config.siteName.replace(/[📚📖📷]/g, '').trim();
         }
-        renderBooks();
-        renderWorksheets();
-      } catch (e) {
-        console.error('無法載入 config.json:', e);
-        showToast('⚠️ 無法載入設定檔，請確認 config.json 存在');
-      }
+        renderBooks(); renderWorksheets();
+      }).catch(function(e) {
+        console.error('config.json:', e);
+        showToast('⚠️ 無法載入設定檔');
+      });
     }
 
-    // ✨ 一次性綁定音訊事件，避免重複綁定
-    globalAudio.addEventListener('timeupdate', () => {
-      if (globalAudio.duration) {
-        const pct = (globalAudio.currentTime / globalAudio.duration) * 100;
-        document.getElementById('progress-fill').style.width = pct + '%';
-        document.getElementById('audio-time').textContent = formatTime(globalAudio.currentTime);
-      }
-    });
-    globalAudio.addEventListener('play', () => document.getElementById('btn-play').textContent = '⏸');
-    globalAudio.addEventListener('pause', () => document.getElementById('btn-play').textContent = '▶');
-    globalAudio.addEventListener('ended', () => {
-      document.getElementById('btn-play').textContent = '▶';
-      document.getElementById('progress-fill').style.width = '0%';
-    });
-    globalAudio.addEventListener('error', () => {
-      showToast('⚠️ 音檔載入失敗');
-      document.getElementById('status-text').textContent = '⚠️ 音檔載入失敗';
-    });
-
-    /* ========================================
-       CONSENT & UNLOCK AUDIO
-    ======================================== */
-    let consentHandled = false;
     function handleConsent() {
-      if (consentHandled) return;
-      consentHandled = true;
-
-      // ✨ 立刻隱藏 UI，不讓 await 卡住畫面
-      document.getElementById('consent-screen').classList.add('hidden');
-      setTimeout(() => {
-        document.getElementById('consent-screen').style.display = 'none';
-        startScanner();
-      }, 500);
-
-      // ✨ 利用使用者的這一次「點擊」，無痛解鎖 globalAudio
+      if (consentDone) return;
+      consentDone = true;
       try {
         globalAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-        globalAudio.play().then(() => {
-          globalAudio.pause();
-        }).catch(e => console.log('音訊解鎖提示:', e));
+        globalAudio.play().then(function(){ globalAudio.pause(); }).catch(function(){});
       } catch(e) {}
+      startScanner();
+      dom.consentScreen.classList.add('hidden');
+      setTimeout(function(){ dom.consentScreen.style.display = 'none'; }, 400);
     }
 
-    /* ========================================
-       QR SCANNER
-    ======================================== */
-    async function startScanner() {
-      const statusDot = document.getElementById('status-dot');
-      const statusText = document.getElementById('status-text');
-
+    function startScanner() {
       if (typeof Html5Qrcode === 'undefined') {
-        statusText.textContent = '正在載入掃描器...';
-        let retries = 0;
-        await new Promise((resolve) => {
-          const check = setInterval(() => {
-            retries++;
-            if (typeof Html5Qrcode !== 'undefined') {
-              clearInterval(check);
-              resolve();
-            } else if (retries > 50) {
-              clearInterval(check);
-              resolve();
-            }
-          }, 100);
-        });
-      }
-
-      if (typeof Html5Qrcode === 'undefined') {
-        statusText.textContent = '⚠️ 掃描器載入失敗，請重新整理頁面';
+        dom.statusText.textContent = '⚠️ 掃描器載入失敗，請重新整理';
         return;
       }
-
-      try {
-        scanner = new Html5Qrcode('qr-reader');
-        await scanner.start(
-          { facingMode: 'environment' },
-          {
-            fps: 10,
-            qrbox: (viewfinderWidth, viewfinderHeight) => {
-              const size = Math.min(viewfinderWidth, viewfinderHeight) * 0.7;
-              return { width: size, height: size };
-            },
-            aspectRatio: 1.0,
-          },
-          onScanSuccess,
-          () => {}  
-        );
+      scanner = new Html5Qrcode('qr-reader');
+      scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: function(w,h){ var s=Math.min(w,h)*0.7; return {width:s,height:s}; }, disableFlip: false },
+        onScanSuccess, function(){}
+      ).then(function() {
         isScanning = true;
-        statusDot.classList.add('scanning');
-        statusText.textContent = '掃描中，請將 QR Code 對準鏡頭...';
-      } catch (err) {
-        console.error('相機啟動失敗:', err);
-        statusDot.classList.remove('scanning');
-        statusText.textContent = '⚠️ 無法啟動相機，請確認已授權相機權限';
+        dom.statusDot.classList.add('scanning');
+        dom.statusText.textContent = '掃描中，請將 QR Code 對準鏡頭...';
+      }).catch(function(err) {
+        console.error('相機:', err);
+        dom.statusDot.classList.remove('scanning');
+        dom.statusText.textContent = '⚠️ 無法啟動相機，請確認已授權相機權限';
+      });
+    }
+
+    function stopScanner() {
+      if (scanner && isScanning) {
+        scanner.stop().then(function(){ isScanning = false; dom.statusDot.classList.remove('scanning'); }).catch(function(){});
       }
     }
 
-    let lastScanTime = 0;
-    async function onScanSuccess(decodedText) {
-      const now = Date.now();
-      if (now - lastScanTime < 2000) return;
+    function onScanSuccess(text) {
+      var now = Date.now();
+      if (now - lastScanTime < 1500) return;
       lastScanTime = now;
-
-      const statusDot = document.getElementById('status-dot');
-      const statusText = document.getElementById('status-text');
-      statusDot.classList.remove('scanning');
-      statusDot.classList.add('found');
-      statusText.textContent = '✅ 已掃描到內容，正在播放...';
-
-      let audioUrl = decodedText;
-      let audioName = '';
-
+      dom.statusDot.classList.remove('scanning');
+      dom.statusDot.classList.add('found');
+      dom.statusText.textContent = '✅ 已掃描到，正在播放...';
+      var url = text, name = '';
       if (config && config.audioFiles) {
-        const match = config.audioFiles.find(a =>
-          a.id === decodedText || a.file === decodedText
-        );
-        if (match) {
-          audioUrl = match.file;
-          audioName = match.name;
+        for (var i = 0; i < config.audioFiles.length; i++) {
+          if (config.audioFiles[i].id === text || config.audioFiles[i].file === text) {
+            url = config.audioFiles[i].file;
+            name = config.audioFiles[i].name;
+            break;
+          }
         }
       }
-
-      if (!audioUrl.startsWith('http') && !audioUrl.startsWith('/') && !audioUrl.startsWith('audio/')) {
-        if (!audioName) audioName = decodedText;
-      }
-
-      playAudio(audioUrl, audioName || audioUrl);
-
-      setTimeout(() => {
-        statusDot.classList.remove('found');
-        statusDot.classList.add('scanning');
-        statusText.textContent = '掃描中，請將 QR Code 對準鏡頭...';
-      }, 3000);
+      playAudio(url, name || text);
+      setTimeout(function() {
+        dom.statusDot.classList.remove('found');
+        dom.statusDot.classList.add('scanning');
+        dom.statusText.textContent = '掃描中，請將 QR Code 對準鏡頭...';
+      }, 2500);
     }
 
-    /* ========================================
-       AUDIO PLAYER
-    ======================================== */
+    globalAudio.addEventListener('timeupdate', function() {
+      if (globalAudio.duration) {
+        dom.progressFill.style.width = (globalAudio.currentTime / globalAudio.duration * 100) + '%';
+        dom.audioTime.textContent = formatTime(globalAudio.currentTime);
+      }
+    });
+    globalAudio.addEventListener('play', function(){ dom.btnPlay.textContent = '⏸'; });
+    globalAudio.addEventListener('pause', function(){ dom.btnPlay.textContent = '▶'; });
+    globalAudio.addEventListener('ended', function(){ dom.btnPlay.textContent = '▶'; dom.progressFill.style.width = '0%'; });
+    globalAudio.addEventListener('error', function(){ showToast('⚠️ 音檔載入失敗'); });
+
     function playAudio(url, name) {
-      // ✨ 不再建立 new Audio()，而是重複使用已經解鎖的 globalAudio
       globalAudio.pause();
       globalAudio.src = url;
-      globalAudio.crossOrigin = 'anonymous';
-
-      const player = document.getElementById('audio-player');
-      document.getElementById('audio-title').textContent = name || '正在播放';
-      document.getElementById('audio-file-name').textContent = url;
-      player.classList.add('visible');
-
-      globalAudio.play().catch(err => {
-        console.error('播放失敗:', err);
-        showToast('⚠️ 播放失敗，請點擊下方播放鈕重試');
-      });
-
+      dom.audioTitle.textContent = name || '正在播放';
+      dom.audioFileName.textContent = url;
+      dom.audioPlayer.classList.add('visible');
+      globalAudio.play().catch(function(e){ console.error('play:', e); showToast('⚠️ 播放失敗，請點擊播放鈕重試'); });
       addToHistory(name || url, url);
     }
 
-    function togglePlay() {
-      if (globalAudio.paused) {
-        globalAudio.play();
-      } else {
-        globalAudio.pause();
-      }
-    }
+    function togglePlay() { if (globalAudio.paused) globalAudio.play(); else globalAudio.pause(); }
 
-    function seek(e) {
+    function seekFromEvent(e) {
       if (!globalAudio.duration) return;
-      const bar = document.getElementById('progress-bar');
-      const rect = bar.getBoundingClientRect();
-      const pct = (e.clientX - rect.left) / rect.width;
-      globalAudio.currentTime = pct * globalAudio.duration;
+      var rect = dom.progressBar.getBoundingClientRect();
+      var cx = e.clientX;
+      if (e.touches && e.touches.length) cx = e.touches[0].clientX;
+      if (e.changedTouches && e.changedTouches.length) cx = e.changedTouches[0].clientX;
+      globalAudio.currentTime = Math.max(0, Math.min(1, (cx - rect.left) / rect.width)) * globalAudio.duration;
     }
 
-    function formatTime(s) {
-      const m = Math.floor(s / 60);
-      const sec = Math.floor(s % 60);
-      return m + ':' + (sec < 10 ? '0' : '') + sec;
-    }
+    function formatTime(s) { var m = Math.floor(s/60), sec = Math.floor(s%60); return m + ':' + (sec<10?'0':'') + sec; }
 
-    /* ========================================
-       PLAY HISTORY
-    ======================================== */
     function addToHistory(name, url) {
-      playHistory.unshift({
-        name: name,
-        url: url,
-        time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
-      });
+      playHistory.unshift({ name: name, url: url, time: new Date().toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit' }) });
       if (playHistory.length > 20) playHistory.pop();
       renderHistory();
     }
 
     function renderHistory() {
-      const container = document.getElementById('audio-history');
-      const list = document.getElementById('history-list');
-      if (playHistory.length === 0) {
-        container.style.display = 'none';
-        return;
-      }
-      container.style.display = 'block';
-      list.innerHTML = playHistory.map(item => `
-        <div class="history-item" onclick="playAudio('${escapeHtml(item.url)}', '${escapeHtml(item.name)}')">
-          <div class="history-icon">🔊</div>
-          <div class="history-info">
-            <div class="history-name">${escapeHtml(item.name)}</div>
-            <div class="history-time">${item.time}</div>
-          </div>
-        </div>
-      `).join('');
+      if (!playHistory.length) { dom.audioHistory.style.display = 'none'; return; }
+      dom.audioHistory.style.display = 'block';
+      dom.historyList.innerHTML = '';
+      playHistory.forEach(function(item) {
+        var div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = '<div class="history-icon">🔊</div><div class="history-info"><div class="history-name">' + escapeHtml(item.name) + '</div><div class="history-time">' + item.time + '</div></div>';
+        div.addEventListener('click', function(){ playAudio(item.url, item.name); });
+        dom.historyList.appendChild(div);
+      });
     }
 
-    /* ========================================
-       BOOKS
-    ======================================== */
     function renderBooks() {
-      const grid = document.getElementById('book-grid');
-      if (!config || !config.books || config.books.length === 0) {
-        grid.innerHTML = `
-          <div class="empty-state" style="grid-column:1/-1">
-            <span class="empty-icon">📖</span>
-            <h3>尚未新增書籍</h3>
-            <p>請在 config.json 中設定書籍資料，<br>並將掃描圖片放入 books/ 資料夾</p>
-          </div>`;
+      if (!config || !config.books || !config.books.length) {
+        dom.bookGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><span class="empty-icon">📖</span><h3>尚未新增書籍</h3><p>請在 config.json 中設定書籍資料</p></div>';
         return;
       }
-
-      grid.innerHTML = config.books.map((book, idx) => `
-        <div class="book-card" onclick="openBook(${idx})">
-          <div class="book-cover">
-            ${book.cover
-              ? `<img src="${escapeHtml(book.cover)}" alt="${escapeHtml(book.title)}" onerror="this.parentElement.innerHTML='📖'">`
-              : '📖'}
-          </div>
-          <div class="book-info">
-            <div class="book-title">${escapeHtml(book.title)}</div>
-            <div class="book-desc">${escapeHtml(book.description || '')}</div>
-            <div class="book-pages-count">${book.pages ? book.pages.length + ' 頁' : ''}</div>
-          </div>
-        </div>
-      `).join('');
+      dom.bookGrid.innerHTML = '';
+      config.books.forEach(function(book, idx) {
+        var card = document.createElement('div');
+        card.className = 'book-card';
+        var coverHtml = book.cover
+          ? '<div class="book-cover"><img src="' + escapeHtml(book.cover) + '" alt="' + escapeHtml(book.title) + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="book-cover-emoji" style="display:none">📖</div></div>'
+          : '<div class="book-cover"><div class="book-cover-emoji">📖</div></div>';
+        card.innerHTML = coverHtml + '<div class="book-info"><div class="book-title">' + escapeHtml(book.title) + '</div><div class="book-desc">' + escapeHtml(book.description||'') + '</div><div class="book-pages-count">' + (book.pages ? book.pages.length + ' 頁' : '') + '</div></div>';
+        card.addEventListener('click', function(){ openBook(idx); });
+        dom.bookGrid.appendChild(card);
+      });
     }
 
-    function openBook(idx) {
-      currentBook = config.books[idx];
-      currentPageIndex = 0;
-      showBookPage();
-      document.getElementById('book-modal').classList.add('open');
-    }
+    function openBook(idx) { currentBook = config.books[idx]; currentPageIndex = 0; showBookPage(); dom.bookModal.classList.add('open'); }
 
     function showBookPage() {
       if (!currentBook || !currentBook.pages) return;
-      const img = document.getElementById('modal-page-img');
-      const info = document.getElementById('modal-page-info');
-      const title = document.getElementById('modal-book-title');
-      const btnPrev = document.getElementById('btn-prev');
-      const btnNext = document.getElementById('btn-next');
-
-      title.textContent = currentBook.title;
-      info.textContent = `第 ${currentPageIndex + 1} / ${currentBook.pages.length} 頁`;
-      img.src = currentBook.pages[currentPageIndex];
-      img.onerror = () => { img.alt = '圖片載入失敗'; };
-
-      btnPrev.disabled = currentPageIndex === 0;
-      btnNext.disabled = currentPageIndex >= currentBook.pages.length - 1;
+      dom.modalTitle.textContent = currentBook.title;
+      dom.modalPageInfo.textContent = '第 ' + (currentPageIndex+1) + ' / ' + currentBook.pages.length + ' 頁';
+      dom.modalImg.src = currentBook.pages[currentPageIndex];
+      dom.modalImg.onerror = function(){ dom.modalImg.alt = '圖片載入失敗'; };
+      dom.btnPrev.disabled = currentPageIndex === 0;
+      dom.btnNext.disabled = currentPageIndex >= currentBook.pages.length - 1;
     }
 
-    function prevPage() {
-      if (currentPageIndex > 0) {
-        currentPageIndex--;
-        showBookPage();
-      }
-    }
+    function closeBookModal() { dom.bookModal.classList.remove('open'); currentBook = null; }
 
-    function nextPage() {
-      if (currentBook && currentPageIndex < currentBook.pages.length - 1) {
-        currentPageIndex++;
-        showBookPage();
-      }
-    }
-
-    function closeBookModal() {
-      document.getElementById('book-modal').classList.remove('open');
-      currentBook = null;
-    }
-
-    // Swipe support for book viewer
-    (function() {
-      let touchStartX = 0;
-      const modal = document.getElementById('book-modal');
-      modal.addEventListener('touchstart', e => {
-        touchStartX = e.touches[0].clientX;
-      }, { passive: true });
-      modal.addEventListener('touchend', e => {
-        const diff = touchStartX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 60) {
-          if (diff > 0) nextPage();
-          else prevPage();
-        }
-      }, { passive: true });
-    })();
-
-    /* ========================================
-       WORKSHEETS
-    ======================================== */
     function renderWorksheets() {
-      const list = document.getElementById('worksheet-list');
-      if (!config || !config.worksheets || config.worksheets.length === 0) {
-        list.innerHTML = `
-          <div class="empty-state">
-            <span class="empty-icon">📝</span>
-            <h3>尚未新增學習單</h3>
-            <p>請在 config.json 中設定學習單資料，<br>並將檔案放入 worksheets/ 資料夾</p>
-          </div>`;
+      if (!config || !config.worksheets || !config.worksheets.length) {
+        dom.worksheetList.innerHTML = '<div class="empty-state"><span class="empty-icon">📝</span><h3>尚未新增學習單</h3><p>請在 config.json 中設定學習單資料</p></div>';
         return;
       }
-
-      list.innerHTML = config.worksheets.map(ws => `
-        <div class="worksheet-card">
-          <div class="ws-icon">📄</div>
-          <div class="ws-info">
-            <div class="ws-title">${escapeHtml(ws.title)}</div>
-            <div class="ws-meta">${escapeHtml(ws.description || '')}</div>
-            <div class="ws-tags">
-              ${ws.grade ? `<span class="ws-tag">${escapeHtml(ws.grade)}</span>` : ''}
-              ${ws.subject ? `<span class="ws-tag subject">${escapeHtml(ws.subject)}</span>` : ''}
-            </div>
-          </div>
-          <a class="btn-download" href="${escapeHtml(ws.file)}" download>下載</a>
-        </div>
-      `).join('');
+      dom.worksheetList.innerHTML = config.worksheets.map(function(ws) {
+        return '<div class="worksheet-card"><div class="ws-icon">📄</div><div class="ws-info"><div class="ws-title">' + escapeHtml(ws.title) + '</div><div class="ws-meta">' + escapeHtml(ws.description||'') + '</div><div class="ws-tags">' + (ws.grade ? '<span class="ws-tag">' + escapeHtml(ws.grade) + '</span>' : '') + (ws.subject ? '<span class="ws-tag subject">' + escapeHtml(ws.subject) + '</span>' : '') + '</div></div><a class="btn-download" href="' + escapeHtml(ws.file) + '" download>下載</a></div>';
+      }).join('');
     }
 
-    /* ========================================
-       TAB SWITCHING
-    ======================================== */
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab') === tabName); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('active', p.id === 'panel-' + tabName); });
+      if (tabName === 'scanner') { if (consentDone && !isScanning) startScanner(); }
+      else { stopScanner(); }
+    }
+
+    function escapeHtml(str) { if (!str) return ''; var d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+    function showToast(msg) { dom.toast.textContent = msg; dom.toast.classList.add('show'); setTimeout(function(){ dom.toast.classList.remove('show'); }, 3000); }
+
+    function init() {
+      cacheDom();
+      dom.tabNav.style.top = dom.header.offsetHeight + 'px';
+      document.getElementById('btn-agree').addEventListener('click', handleConsent);
+      dom.btnPlay.addEventListener('click', togglePlay);
+      dom.progressBar.addEventListener('click', seekFromEvent);
+      dom.progressBar.addEventListener('touchstart', seekFromEvent, { passive: true });
+      dom.progressBar.addEventListener('touchmove', seekFromEvent, { passive: true });
+      dom.tabNav.addEventListener('click', function(e) { var b = e.target.closest('.tab-btn'); if (b) switchTab(b.getAttribute('data-tab')); });
+      dom.btnPrev.addEventListener('click', function(){ if (currentPageIndex > 0) { currentPageIndex--; showBookPage(); } });
+      dom.btnNext.addEventListener('click', function(){ if (currentBook && currentPageIndex < currentBook.pages.length - 1) { currentPageIndex++; showBookPage(); } });
+      document.getElementById('btn-close-book').addEventListener('click', closeBookModal);
+      (function() {
+        var sx = 0;
+        dom.bookModal.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; }, { passive: true });
+        dom.bookModal.addEventListener('touchend', function(e){
+          var d = sx - e.changedTouches[0].clientX;
+          if (Math.abs(d) > 60) {
+            if (d > 0 && currentBook && currentPageIndex < currentBook.pages.length-1) { currentPageIndex++; showBookPage(); }
+            else if (d < 0 && currentPageIndex > 0) { currentPageIndex--; showBookPage(); }
+          }
+        }, { passive: true });
+      })();
+      document.addEventListener('keydown', function(e) {
+        if (!dom.bookModal.classList.contains('open')) return;
+        if (e.key === 'ArrowLeft' && currentPageIndex > 0) { currentPageIndex--; showBookPage(); }
+        if (e.key === 'ArrowRight' && currentBook && currentPageIndex < currentBook.pages.length-1) { currentPageIndex++; showBookPage(); }
+        if (e.key === 'Escape') closeBookModal();
       });
-      document.querySelectorAll('.tab-panel').forEach(panel => {
-        panel.classList.toggle('active', panel.id === 'panel-' + tab);
-      });
+      loadConfig();
     }
 
-    /* ========================================
-       UTILITIES
-    ======================================== */
-    function escapeHtml(str) {
-      if (!str) return '';
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    // Keyboard nav for book modal
-    document.addEventListener('keydown', e => {
-      if (!document.getElementById('book-modal').classList.contains('open')) return;
-      if (e.key === 'ArrowLeft') prevPage();
-      if (e.key === 'ArrowRight') nextPage();
-      if (e.key === 'Escape') closeBookModal();
-    });
-
-    // Backup: also bind consent button via addEventListener (more reliable on some mobile browsers)
-    document.getElementById('btn-agree').addEventListener('click', handleConsent);
-    document.getElementById('btn-agree').addEventListener('touchend', function(e) {
-      e.preventDefault();
-      handleConsent();
-    });
-
-    // Init
-    loadConfig();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
   </script>
 
   <script>
-    (function() {
+    (function(){
       var s = document.createElement('script');
       s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
       s.async = true;
-      s.onload = function() { console.log('QR library loaded'); };
       s.onerror = function() {
-        console.warn('QR library failed to load from CDN, trying fallback...');
         var s2 = document.createElement('script');
         s2.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
         s2.async = true;
-        s2.onerror = function() {
-          var statusText = document.getElementById('status-text');
-          if (statusText) statusText.textContent = '⚠️ QR Code 掃描器載入失敗，請確認網路連線';
-        };
+        s2.onerror = function(){ var e = document.getElementById('status-text'); if (e) e.textContent = '⚠️ 掃描器載入失敗，請確認網路後重新整理'; };
         document.body.appendChild(s2);
       };
       document.body.appendChild(s);
     })();
   </script>
+
 </body>
 </html>
