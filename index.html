@@ -238,9 +238,16 @@
     var config = null, scanner = null, isScanning = false;
     var playHistory = [], currentBook = null, currentPageIndex = 0;
     var consentDone = false, lastScanTime = 0;
-    var globalAudio = new Audio();
-    var audioCtx = null;
     var dom = {};
+
+    // ★ 純 AudioContext 音訊系統 — 不依賴 HTMLAudioElement
+    var audioCtx = null;
+    var currentSource = null;   // AudioBufferSourceNode（正在播放的節點）
+    var currentBuffer = null;   // AudioBuffer（已解碼的音訊資料）
+    var audioStartTime = 0;     // 播放開始時的 audioCtx.currentTime
+    var audioOffset = 0;        // 目前播放位置（秒）
+    var isPlaying = false;
+    var progressTimer = null;
 
     function cacheDom() {
       var ids = ['consent-screen','status-dot','status-text','audio-player','audio-title',
@@ -279,24 +286,20 @@
       if (consentDone) return;
       consentDone = true;
 
-      // ★ 核心修正：建立 AudioContext 並將 globalAudio 接上去
-      // AudioContext 在使用者手勢中 resume 後就永久解鎖
-      // 透過 createMediaElementSource 把 Audio 元件路由到已解鎖的管線
-      // 之後即使換 src，因為走的是 AudioContext 管線，所以不會被擋
+      // ★ 在使用者手勢中建立並解鎖 AudioContext
+      // 一旦 resume() 成功，之後所有透過 AudioContext 的播放都不需要手勢
       try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var source = audioCtx.createMediaElementSource(globalAudio);
-        source.connect(audioCtx.destination);
         audioCtx.resume();
+        // 播放一個極短的靜音 buffer 完成完整解鎖
+        var silentBuf = audioCtx.createBuffer(1, 1, 22050);
+        var silentSrc = audioCtx.createBufferSource();
+        silentSrc.buffer = silentBuf;
+        silentSrc.connect(audioCtx.destination);
+        silentSrc.start(0);
       } catch(e) {
-        console.warn('AudioContext 建立失敗:', e);
+        console.warn('AudioContext:', e);
       }
-
-      // 同時也用傳統方式解鎖 Audio 元件（雙重保險）
-      try {
-        globalAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-        globalAudio.play().then(function(){ globalAudio.pause(); }).catch(function(){});
-      } catch(e) {}
 
       startScanner();
       dom.consentScreen.classList.add('hidden');
@@ -355,53 +358,136 @@
       }, 2500);
     }
 
-    globalAudio.addEventListener('timeupdate', function() {
-      if (globalAudio.duration) {
-        dom.progressFill.style.width = (globalAudio.currentTime / globalAudio.duration * 100) + '%';
-        dom.audioTime.textContent = formatTime(globalAudio.currentTime);
-      }
-    });
-    globalAudio.addEventListener('play', function(){ dom.btnPlay.textContent = '⏸'; });
-    globalAudio.addEventListener('pause', function(){ dom.btnPlay.textContent = '▶'; });
-    globalAudio.addEventListener('ended', function(){ dom.btnPlay.textContent = '▶'; dom.progressFill.style.width = '0%'; });
-    globalAudio.addEventListener('error', function(){ showToast('⚠️ 音檔載入失敗'); });
+    // ★ 純 AudioContext 播放系統
 
     function playAudio(url, name) {
-      // 確保 AudioContext 是活躍的
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      // 停止目前播放
+      stopCurrentAudio();
 
-      globalAudio.pause();
-      globalAudio.src = url;
-      globalAudio.load(); // 明確載入新音源
-
+      // 先更新 UI
       dom.audioTitle.textContent = name || '正在播放';
       dom.audioFileName.textContent = url;
       dom.audioPlayer.classList.add('visible');
+      dom.btnPlay.textContent = '⏳';
+      dom.progressFill.style.width = '0%';
+      dom.audioTime.textContent = '0:00';
 
-      globalAudio.play().catch(function(e) {
-        console.error('自動播放失敗:', e);
-        // 如果自動播放被擋，提示使用者手動點擊
-        showToast('請點擊播放鈕 ▶ 開始播放');
+      if (!audioCtx) {
+        showToast('⚠️ 音訊系統未初始化，請重新整理');
+        return;
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      // 用 fetch 下載音檔 → 解碼 → 播放
+      fetch(url).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.arrayBuffer();
+      }).then(function(arrayBuf) {
+        return audioCtx.decodeAudioData(arrayBuf);
+      }).then(function(decoded) {
+        currentBuffer = decoded;
+        audioOffset = 0;
+        startPlayback();
+      }).catch(function(e) {
+        console.error('音檔載入/解碼失敗:', e);
+        showToast('⚠️ 音檔載入失敗：' + (e.message || '未知錯誤'));
+        dom.btnPlay.textContent = '▶';
       });
 
       addToHistory(name || url, url);
     }
 
+    function startPlayback() {
+      if (!currentBuffer || !audioCtx) return;
+      // 停止舊的 source
+      stopSource();
+
+      currentSource = audioCtx.createBufferSource();
+      currentSource.buffer = currentBuffer;
+      currentSource.connect(audioCtx.destination);
+
+      // 從 audioOffset 開始播放
+      var offset = Math.min(audioOffset, currentBuffer.duration);
+      currentSource.start(0, offset);
+      audioStartTime = audioCtx.currentTime;
+      isPlaying = true;
+      dom.btnPlay.textContent = '⏸';
+
+      // 播放結束回呼
+      currentSource.onended = function() {
+        if (isPlaying) {
+          // 自然結束（不是手動停止）
+          isPlaying = false;
+          audioOffset = 0;
+          dom.btnPlay.textContent = '▶';
+          dom.progressFill.style.width = '0%';
+          dom.audioTime.textContent = formatTime(currentBuffer.duration);
+          clearInterval(progressTimer);
+        }
+      };
+
+      // 定時更新進度條
+      clearInterval(progressTimer);
+      progressTimer = setInterval(updateProgress, 100);
+    }
+
+    function stopSource() {
+      if (currentSource) {
+        try { currentSource.onended = null; currentSource.stop(); } catch(e) {}
+        currentSource = null;
+      }
+      clearInterval(progressTimer);
+    }
+
+    function stopCurrentAudio() {
+      if (isPlaying) {
+        audioOffset += audioCtx.currentTime - audioStartTime;
+      }
+      stopSource();
+      isPlaying = false;
+    }
+
     function togglePlay() {
+      if (!currentBuffer) return;
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      if (globalAudio.paused) globalAudio.play();
-      else globalAudio.pause();
+
+      if (isPlaying) {
+        // 暫停：記住目前位置，停止 source
+        audioOffset += audioCtx.currentTime - audioStartTime;
+        stopSource();
+        isPlaying = false;
+        dom.btnPlay.textContent = '▶';
+      } else {
+        // 繼續播放：從記住的位置開始
+        if (audioOffset >= currentBuffer.duration) audioOffset = 0;
+        startPlayback();
+      }
+    }
+
+    function updateProgress() {
+      if (!currentBuffer || !isPlaying) return;
+      var elapsed = audioOffset + (audioCtx.currentTime - audioStartTime);
+      var duration = currentBuffer.duration;
+      if (elapsed > duration) elapsed = duration;
+      dom.progressFill.style.width = (elapsed / duration * 100) + '%';
+      dom.audioTime.textContent = formatTime(elapsed);
     }
 
     function seekFromEvent(e) {
-      if (!globalAudio.duration) return;
+      if (!currentBuffer) return;
       var rect = dom.progressBar.getBoundingClientRect();
       var cx = e.clientX;
       if (e.touches && e.touches.length) cx = e.touches[0].clientX;
       if (e.changedTouches && e.changedTouches.length) cx = e.changedTouches[0].clientX;
-      globalAudio.currentTime = Math.max(0, Math.min(1, (cx - rect.left) / rect.width)) * globalAudio.duration;
+      var pct = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+      audioOffset = pct * currentBuffer.duration;
+      if (isPlaying) {
+        startPlayback(); // 重新從新位置開始
+      } else {
+        // 只更新 UI，不播放
+        dom.progressFill.style.width = (pct * 100) + '%';
+        dom.audioTime.textContent = formatTime(audioOffset);
+      }
     }
 
     function formatTime(s) { var m = Math.floor(s/60), sec = Math.floor(s%60); return m + ':' + (sec<10?'0':'') + sec; }
