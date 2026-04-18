@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -16,158 +15,321 @@
       --shadow-lg:0 8px 32px rgba(0,0,0,.12); --radius:16px; --radius-sm:10px;
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    button,a,.book-card,.history-item,.tab-btn,.btn-consent,.btn-play,.btn-nav,.btn-close-modal,.btn-download,.tap-overlay{
+    button,a,.book-card,.history-item,.tab-btn,.btn-consent,.btn-download{
       touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;
     }
-    body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
+    body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
 
-```
-#consent-screen{position:fixed;inset:0;background:linear-gradient(135deg,#FF6B35,#FF8C5A 40%,#FFA96B);display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .4s,transform .4s}
-#consent-screen.hidden{opacity:0;transform:scale(1.05);pointer-events:none}
-.consent-box{background:#fff;border-radius:24px;padding:48px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:slideUp .5s ease-out}
-@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-.consent-icon{font-size:64px;margin-bottom:16px;display:block}
-.consent-box h1{font-size:26px;font-weight:900;color:var(--secondary);margin-bottom:12px}
-.consent-box p{font-size:15px;color:var(--text-light);line-height:1.7;margin-bottom:28px}
-.consent-features{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
-.consent-features span{background:var(--primary-pale);color:var(--primary);font-size:13px;font-weight:500;padding:6px 14px;border-radius:20px}
-.btn-consent{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;padding:16px 48px;font-size:18px;font-weight:700;border-radius:50px;font-family:inherit;box-shadow:0 4px 20px rgba(255,107,53,.4);transition:transform .15s}
-.btn-consent:active{transform:scale(.96)}
+    /* ===== CONSENT SCREEN (redesigned: clean & centered) ===== */
+    #consent-screen {
+      position:fixed;inset:0;
+      background:#1B4965;
+      display:flex;align-items:center;justify-content:center;
+      z-index:1000;transition:opacity .4s,transform .4s;
+    }
+    #consent-screen.hidden{opacity:0;transform:scale(1.03);pointer-events:none}
+    .consent-card {
+      text-align:center;padding:40px 32px;width:88%;max-width:380px;
+    }
+    .consent-logo {
+      width:100px;height:100px;margin:0 auto 24px;
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      border-radius:28px;display:flex;align-items:center;justify-content:center;
+      font-size:48px;box-shadow:0 8px 32px rgba(255,107,53,.3);
+    }
+    .consent-card h1 {
+      font-size:24px;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.5px;
+    }
+    .consent-card p {
+      font-size:14px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:32px;
+    }
+    .consent-perms {
+      display:flex;flex-direction:column;gap:12px;margin-bottom:32px;text-align:left;
+    }
+    .consent-perm {
+      display:flex;align-items:center;gap:12px;
+      background:rgba(255,255,255,.08);border-radius:12px;padding:12px 16px;
+    }
+    .consent-perm-icon {
+      width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+      font-size:20px;flex-shrink:0;
+    }
+    .consent-perm-icon.cam{background:rgba(59,130,246,.2)}
+    .consent-perm-icon.audio{background:rgba(255,107,53,.2)}
+    .consent-perm-text{font-size:13px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.4}
+    .consent-perm-text small{display:block;font-weight:400;color:rgba(255,255,255,.45);font-size:11px;margin-top:2px}
 
-.app-header{background:#fff;padding:14px 20px;box-shadow:0 1px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:100}
-.header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
-.site-title{font-size:20px;font-weight:900;color:var(--secondary)}
-.site-title span{color:var(--primary)}
+    .btn-consent {
+      width:100%;padding:16px;font-size:17px;font-weight:700;
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      color:#fff;border:none;border-radius:50px;font-family:inherit;
+      box-shadow:0 4px 24px rgba(255,107,53,.4);transition:transform .15s;
+    }
+    .btn-consent:active{transform:scale(.97)}
 
-.tab-nav{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;z-index:99;max-width:800px;margin:0 auto}
-.tab-btn{flex:1;padding:14px 8px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text-light);position:relative;transition:color .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
-.tab-btn .tab-icon{font-size:20px}
-.tab-btn.active{color:var(--primary);font-weight:700}
-.tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:20%;right:20%;height:3px;background:var(--primary);border-radius:3px 3px 0 0}
+    /* ===== HEADER ===== */
+    .app-header{background:#fff;padding:14px 20px;box-shadow:0 1px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:100}
+    .header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .site-title{font-size:20px;font-weight:900;color:var(--secondary)}
+    .site-title span{color:var(--primary)}
 
-.main-content{max-width:800px;margin:0 auto;padding:20px 16px 100px}
-.tab-panel{display:none}
-.tab-panel.active{display:block;animation:fadeIn .25s ease-out}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    /* ===== TABS ===== */
+    .tab-nav{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;z-index:99;max-width:800px;margin:0 auto}
+    .tab-btn{flex:1;padding:14px 8px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text-light);position:relative;transition:color .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .tab-btn .tab-icon{font-size:20px}
+    .tab-btn.active{color:var(--primary);font-weight:700}
+    .tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:20%;right:20%;height:3px;background:var(--primary);border-radius:3px 3px 0 0}
 
-.scanner-wrapper{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
-.scanner-header{padding:20px 20px 12px}
-.scanner-header h2{font-size:20px;font-weight:700;color:var(--secondary);margin-bottom:6px}
-.scanner-header p{font-size:14px;color:var(--text-light)}
-#qr-reader{width:100%;min-height:280px;max-height:400px;background:#1a1a2e;position:relative}
-#qr-reader video{object-fit:cover}
-.scanner-status{padding:16px 20px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500}
-.status-dot{width:10px;height:10px;border-radius:50%;background:#ccc;flex-shrink:0}
-.status-dot.scanning{background:#22c55e;animation:pulse 1.5s infinite}
-.status-dot.found{background:var(--primary)}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+    /* ===== MAIN ===== */
+    .main-content{max-width:800px;margin:0 auto;padding:20px 16px 100px}
+    .tab-panel{display:none}.tab-panel.active{display:block;animation:fadeIn .25s ease-out}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-.audio-player{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:none;position:relative}
-.audio-player.visible{display:block;animation:fadeIn .25s}
-.audio-player-title{font-size:16px;font-weight:700;color:var(--secondary);margin-bottom:4px}
-.audio-player-file{font-size:13px;color:var(--text-light);margin-bottom:14px;word-break:break-all}
-.audio-controls{display:flex;align-items:center;gap:12px}
-.btn-play{width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(255,107,53,.3)}
-.progress-bar{flex:1;height:24px;display:flex;align-items:center;cursor:pointer;position:relative}
-.progress-track{width:100%;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;width:0%;background:var(--primary);border-radius:3px;transition:width .1s linear}
-.audio-time{font-size:12px;color:var(--text-light);font-variant-numeric:tabular-nums;min-width:40px;text-align:right}
+    /* ===== SCANNER ===== */
+    .scanner-wrapper{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
+    .scanner-header{padding:20px 20px 12px}
+    .scanner-header h2{font-size:20px;font-weight:700;color:var(--secondary);margin-bottom:6px}
+    .scanner-header p{font-size:14px;color:var(--text-light)}
+    #qr-reader{width:100%;min-height:280px;max-height:400px;background:#1a1a2e;position:relative}
+    #qr-reader video{object-fit:cover}
+    .scanner-status{padding:16px 20px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500}
+    .status-dot{width:10px;height:10px;border-radius:50%;background:#ccc;flex-shrink:0}
+    .status-dot.scanning{background:#22c55e;animation:pulse 1.5s infinite}
+    .status-dot.found{background:var(--primary)}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
 
-/* ★ 點擊播放的覆蓋層 — iOS 自動播放失敗時顯示 */
-.tap-overlay{
-  position:absolute;inset:0;background:rgba(255,255,255,.92);
-  display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;
-  border-radius:var(--radius);z-index:10;
-}
-.tap-overlay.show{display:flex}
-.tap-overlay-btn{
-  width:72px;height:72px;border-radius:50%;border:none;
-  background:linear-gradient(135deg,var(--primary),var(--primary-light));
-  color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(255,107,53,.4);
-  animation:tapPulse 1.5s ease-in-out infinite;
-}
-@keyframes tapPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-.tap-overlay-text{font-size:15px;font-weight:700;color:var(--primary)}
+    /* ===== HISTORY (below scanner) ===== */
+    .audio-history{margin-top:8px}
+    .audio-history h3{font-size:15px;font-weight:700;color:var(--text-light);margin-bottom:10px}
+    .history-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:background .15s}
+    .history-item:active{background:var(--primary-pale)}
+    .history-icon{width:36px;height:36px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .history-info{flex:1;min-width:0}
+    .history-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .history-time{font-size:12px;color:var(--text-light)}
 
-.audio-history{margin-top:20px}
-.audio-history h3{font-size:15px;font-weight:700;color:var(--text-light);margin-bottom:10px}
-.history-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:background .15s}
-.history-item:active{background:var(--primary-pale)}
-.history-icon{width:36px;height:36px;background:var(--primary-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.history-info{flex:1;min-width:0}
-.history-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.history-time{font-size:12px;color:var(--text-light)}
+    /* ===== PLAYER OVERLAY (album cover style) ===== */
+    #player-overlay {
+      position:fixed;inset:0;z-index:600;
+      display:none;flex-direction:column;
+      transition:transform .35s ease,opacity .35s ease;
+      transform:translateY(100%);opacity:0;
+    }
+    #player-overlay.open{display:flex;transform:translateY(0);opacity:1}
+    #player-overlay.closing{transform:translateY(100%);opacity:0}
 
-.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
-.book-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .15s}
-.book-card:active{transform:scale(.97)}
-.book-cover{width:100%;padding-top:133%;background:linear-gradient(135deg,var(--secondary),var(--secondary-light));position:relative}
-.book-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.book-cover-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px}
-.book-info{padding:12px 14px}
-.book-title{font-size:15px;font-weight:700;margin-bottom:4px}
-.book-desc{font-size:12px;color:var(--text-light)}
-.book-pages-count{font-size:12px;color:var(--primary);font-weight:500;margin-top:4px}
+    .player-bg {
+      position:absolute;inset:0;
+      background:linear-gradient(160deg,#1B2A3D 0%,#0F1923 50%,#1a1025 100%);
+    }
+    .player-content {
+      position:relative;z-index:1;flex:1;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;padding:40px 24px 0;max-width:420px;
+      margin:0 auto;width:100%;
+    }
 
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;flex-direction:column}
-.modal-overlay.open{display:flex}
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;color:#fff}
-.modal-title{font-size:16px;font-weight:700}
-.modal-page-info{font-size:13px;opacity:.7}
-.btn-close-modal{background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px}
-.modal-body{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:8px}
-.modal-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
-.modal-nav{display:flex;justify-content:center;gap:16px;padding:12px 16px 24px}
-.btn-nav{background:rgba(255,255,255,.15);border:none;color:#fff;padding:12px 28px;border-radius:50px;font-size:15px;font-weight:600;font-family:inherit;transition:background .15s}
-.btn-nav:active{background:rgba(255,255,255,.3)}
-.btn-nav:disabled{opacity:.3}
+    /* Album art */
+    .album-art {
+      width:220px;height:220px;border-radius:24px;
+      background:linear-gradient(135deg,var(--primary),#e85d04,#dc2f02);
+      display:flex;align-items:center;justify-content:center;
+      font-size:80px;box-shadow:0 16px 48px rgba(0,0,0,.4);
+      margin-bottom:32px;position:relative;overflow:hidden;
+    }
+    .album-art .album-wave {
+      position:absolute;bottom:0;left:0;right:0;height:60px;
+      background:linear-gradient(transparent,rgba(0,0,0,.2));
+    }
 
-.worksheet-list{display:flex;flex-direction:column;gap:12px}
-.worksheet-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;display:flex;align-items:center;gap:14px}
-.ws-icon{width:48px;height:48px;background:var(--accent-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.ws-info{flex:1;min-width:0}
-.ws-title{font-size:15px;font-weight:700;margin-bottom:2px}
-.ws-meta{font-size:12px;color:var(--text-light)}
-.ws-tags{display:flex;gap:6px;margin-top:6px}
-.ws-tag{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--primary-pale);color:var(--primary);font-weight:500}
-.ws-tag.subject{background:#E8F0FE;color:#1a5fb4}
-.btn-download{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;text-decoration:none;white-space:nowrap}
+    .player-title {
+      font-size:22px;font-weight:900;color:#fff;text-align:center;
+      margin-bottom:4px;max-width:100%;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .player-subtitle {
+      font-size:13px;color:rgba(255,255,255,.45);margin-bottom:36px;text-align:center;
+      word-break:break-all;max-width:100%;
+    }
 
-.empty-state{text-align:center;padding:60px 20px;color:var(--text-light)}
-.empty-state .empty-icon{font-size:56px;margin-bottom:16px;display:block}
-.empty-state h3{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)}
-.empty-state p{font-size:14px;line-height:1.6}
-.section-header{margin-bottom:16px}
-.section-header h2{font-size:22px;font-weight:900;color:var(--secondary);margin-bottom:4px}
-.section-header p{font-size:14px;color:var(--text-light)}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--secondary);color:#fff;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;transition:transform .3s ease;pointer-events:none}
-.toast.show{transform:translateX(-50%) translateY(0)}
-@media(min-width:600px){.consent-box{padding:56px 48px}.book-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-#qr-reader__dashboard,#qr-reader__status_span,#qr-reader__header_message,#qr-reader img[alt="Info icon"],#qr-reader a{display:none!important}
-#qr-reader__scan_region{min-height:0!important}
-#qr-reader__scan_region video{border-radius:0!important}
-```
+    /* Progress bar — large & touch friendly */
+    .player-progress-wrap {
+      width:100%;padding:0 4px;margin-bottom:8px;
+    }
+    .player-progress {
+      width:100%;height:44px;display:flex;align-items:center;position:relative;cursor:pointer;
+    }
+    .player-track {
+      width:100%;height:6px;background:rgba(255,255,255,.15);border-radius:3px;
+      position:relative;overflow:visible;
+    }
+    .player-track-fill {
+      height:100%;width:0%;background:var(--primary);border-radius:3px;
+      transition:width .15s linear;
+    }
+    .player-thumb {
+      position:absolute;top:50%;right:0;
+      width:22px;height:22px;border-radius:50%;
+      background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3);
+      transform:translate(50%,-50%);
+      pointer-events:none;
+    }
+    .player-times {
+      display:flex;justify-content:space-between;width:100%;
+      font-size:12px;color:rgba(255,255,255,.4);font-variant-numeric:tabular-nums;
+      margin-bottom:32px;padding:0 4px;
+    }
 
+    /* Controls */
+    .player-controls {
+      display:flex;align-items:center;gap:32px;margin-bottom:40px;
+    }
+    .ctrl-btn {
+      background:none;border:none;color:rgba(255,255,255,.6);font-size:28px;
+      width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+      border-radius:50%;transition:color .15s,background .15s;
+    }
+    .ctrl-btn:active{background:rgba(255,255,255,.1)}
+    .ctrl-play {
+      width:72px;height:72px;border-radius:50%;border:none;
+      background:#fff;color:var(--secondary);font-size:28px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .15s;
+    }
+    .ctrl-play:active{transform:scale(.93)}
+
+    /* Back button */
+    .player-back {
+      position:relative;z-index:2;
+      display:flex;align-items:center;gap:8px;
+      padding:20px 24px;
+    }
+    .btn-back {
+      background:none;border:none;color:rgba(255,255,255,.6);
+      font-size:14px;font-weight:600;font-family:inherit;
+      display:flex;align-items:center;gap:6px;padding:8px 0;
+    }
+    .btn-back:active{color:#fff}
+
+    /* Tap to play fallback */
+    .tap-hint {
+      display:none;align-items:center;gap:8px;
+      background:rgba(255,107,53,.2);border-radius:50px;
+      padding:10px 20px;margin-bottom:16px;
+      animation:tapBlink 1.5s ease-in-out infinite;
+    }
+    .tap-hint.show{display:flex}
+    .tap-hint-text{font-size:14px;font-weight:600;color:var(--primary-light)}
+    @keyframes tapBlink{0%,100%{opacity:.7}50%{opacity:1}}
+
+    /* ===== BOOKS ===== */
+    .book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+    .book-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .15s}
+    .book-card:active{transform:scale(.97)}
+    .book-cover{width:100%;padding-top:133%;background:linear-gradient(135deg,var(--secondary),var(--secondary-light));position:relative}
+    .book-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .book-cover-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px}
+    .book-info{padding:12px 14px}
+    .book-title{font-size:15px;font-weight:700;margin-bottom:4px}
+    .book-desc{font-size:12px;color:var(--text-light)}
+    .book-pages-count{font-size:12px;color:var(--primary);font-weight:500;margin-top:4px}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;flex-direction:column}
+    .modal-overlay.open{display:flex}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;color:#fff}
+    .modal-title{font-size:16px;font-weight:700}
+    .modal-page-info{font-size:13px;opacity:.7}
+    .btn-close-modal{background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px}
+    .modal-body{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:8px}
+    .modal-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
+    .modal-nav{display:flex;justify-content:center;gap:16px;padding:12px 16px 24px}
+    .btn-nav{background:rgba(255,255,255,.15);border:none;color:#fff;padding:12px 28px;border-radius:50px;font-size:15px;font-weight:600;font-family:inherit;transition:background .15s}
+    .btn-nav:active{background:rgba(255,255,255,.3)}
+    .btn-nav:disabled{opacity:.3}
+
+    /* ===== WORKSHEETS ===== */
+    .worksheet-list{display:flex;flex-direction:column;gap:12px}
+    .worksheet-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;display:flex;align-items:center;gap:14px}
+    .ws-icon{width:48px;height:48px;background:var(--accent-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+    .ws-info{flex:1;min-width:0}
+    .ws-title{font-size:15px;font-weight:700;margin-bottom:2px}
+    .ws-meta{font-size:12px;color:var(--text-light)}
+    .ws-tags{display:flex;gap:6px;margin-top:6px}
+    .ws-tag{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--primary-pale);color:var(--primary);font-weight:500}
+    .ws-tag.subject{background:#E8F0FE;color:#1a5fb4}
+    .btn-download{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;text-decoration:none;white-space:nowrap}
+
+    .empty-state{text-align:center;padding:60px 20px;color:var(--text-light)}
+    .empty-state .empty-icon{font-size:56px;margin-bottom:16px;display:block}
+    .empty-state h3{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)}
+    .empty-state p{font-size:14px;line-height:1.6}
+    .section-header{margin-bottom:16px}
+    .section-header h2{font-size:22px;font-weight:900;color:var(--secondary);margin-bottom:4px}
+    .section-header p{font-size:14px;color:var(--text-light)}
+    .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--secondary);color:#fff;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;transition:transform .3s ease;pointer-events:none}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+    @media(min-width:600px){.consent-card{padding:48px 40px}.book-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.album-art{width:260px;height:260px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    #qr-reader__dashboard,#qr-reader__status_span,#qr-reader__header_message,#qr-reader img[alt="Info icon"],#qr-reader a{display:none!important}
+    #qr-reader__scan_region{min-height:0!important}
+    #qr-reader__scan_region video{border-radius:0!important}
   </style>
 </head>
 <body>
 
+  <!-- CONSENT -->
   <div id="consent-screen">
-    <div class="consent-box">
-      <span class="consent-icon">🎧</span>
+    <div class="consent-card">
+      <div class="consent-logo">🎧</div>
       <h1>互動學習平台</h1>
-      <p>本平台需要使用您的相機來掃描 QR Code，<br>掃描後將自動播放對應的音檔。</p>
-      <div class="consent-features">
-        <span>📷 相機掃描</span>
-        <span>🔊 自動播放</span>
-        <span>📖 數位閱讀</span>
+      <p>掃描課本上的 QR Code<br>即可聆聽對應的音檔</p>
+      <div class="consent-perms">
+        <div class="consent-perm">
+          <div class="consent-perm-icon cam">📷</div>
+          <div class="consent-perm-text">開啟相機<small>用來掃描 QR Code</small></div>
+        </div>
+        <div class="consent-perm">
+          <div class="consent-perm-icon audio">🔊</div>
+          <div class="consent-perm-text">允許播放音訊<small>掃描後自動播放音檔</small></div>
+        </div>
       </div>
       <button class="btn-consent" id="btn-agree">同意並開始使用</button>
     </div>
   </div>
 
+  <!-- PLAYER OVERLAY (album style) -->
+  <div id="player-overlay">
+    <div class="player-bg"></div>
+    <div class="player-back">
+      <button class="btn-back" id="btn-back-to-scan">◀ 返回掃描</button>
+    </div>
+    <div class="player-content">
+      <div class="album-art" id="album-art">🎵<div class="album-wave"></div></div>
+      <div class="player-title" id="player-title">載入中...</div>
+      <div class="player-subtitle" id="player-subtitle"></div>
+      <div class="tap-hint" id="tap-hint">
+        <span class="tap-hint-text">👆 點擊畫面任意處播放</span>
+      </div>
+      <div class="player-progress-wrap">
+        <div class="player-progress" id="player-progress">
+          <div class="player-track">
+            <div class="player-track-fill" id="player-fill"></div>
+            <div class="player-thumb" id="player-thumb"></div>
+          </div>
+        </div>
+      </div>
+      <div class="player-times">
+        <span id="player-time-current">0:00</span>
+        <span id="player-time-total">0:00</span>
+      </div>
+      <div class="player-controls">
+        <button class="ctrl-btn" id="ctrl-rew">⏪</button>
+        <button class="ctrl-play" id="ctrl-play">▶</button>
+        <button class="ctrl-btn" id="ctrl-fwd">⏩</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
   <header class="app-header" id="app-header">
     <div class="header-inner">
       <div class="site-title" id="site-title">📚 互動<span>學習</span>平台</div>
@@ -193,24 +355,8 @@
           <span id="status-text">準備中...</span>
         </div>
       </div>
-      <div class="audio-player" id="audio-player">
-        <div class="audio-player-title" id="audio-title">正在播放</div>
-        <div class="audio-player-file" id="audio-file-name"></div>
-        <div class="audio-controls">
-          <button class="btn-play" id="btn-play">▶</button>
-          <div class="progress-bar" id="progress-bar">
-            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-          </div>
-          <span class="audio-time" id="audio-time">0:00</span>
-        </div>
-        <!-- ★ iOS 自動播放失敗時的點擊播放覆蓋層 -->
-        <div class="tap-overlay" id="tap-overlay">
-          <button class="tap-overlay-btn" id="tap-play-btn">▶</button>
-          <span class="tap-overlay-text">點一下播放</span>
-        </div>
-      </div>
       <div class="audio-history" id="audio-history" style="display:none">
-        <h3>📜 播放紀錄</h3>
+        <h3>📜 最近播放</h3>
         <div id="history-list"></div>
       </div>
     </div>
@@ -224,6 +370,7 @@
     </div>
   </main>
 
+  <!-- Book Modal -->
   <div class="modal-overlay" id="book-modal">
     <div class="modal-header">
       <div><div class="modal-title" id="modal-book-title"></div><div class="modal-page-info" id="modal-page-info"></div></div>
@@ -245,19 +392,20 @@
     var config = null, scanner = null, isScanning = false;
     var playHistory = [], currentBook = null, currentPageIndex = 0;
     var consentDone = false, lastScanTime = 0;
-    var pendingUrl = '';
 
-    // ★ 單一 Audio 元件，整個生命週期只用這一個
     var audio = new Audio();
     audio.preload = 'auto';
 
     var D = {};
     function cacheDom() {
-      ['consent-screen','status-dot','status-text','audio-player','audio-title',
-       'audio-file-name','btn-play','progress-fill','progress-bar','audio-time',
+      ['consent-screen','status-dot','status-text',
        'audio-history','history-list','book-grid','worksheet-list','book-modal',
        'modal-page-img','modal-book-title','modal-page-info','btn-prev','btn-next',
-       'site-title','app-header','tab-nav','toast','tap-overlay'].forEach(function(id) {
+       'site-title','app-header','tab-nav','toast',
+       'player-overlay','album-art','player-title','player-subtitle',
+       'player-fill','player-thumb','player-progress',
+       'player-time-current','player-time-total',
+       'ctrl-play','tap-hint'].forEach(function(id) {
         D[id] = document.getElementById(id);
       });
     }
@@ -273,8 +421,7 @@
           D['site-title'].innerHTML = config.siteName.replace(/學習/g, '<span>學習</span>');
           document.title = config.siteName.replace(/[📚📖📷]/g, '').trim();
         }
-        renderBooks();
-        renderWorksheets();
+        renderBooks(); renderWorksheets();
       }).catch(function(e) {
         console.error('config:', e);
         showToast('⚠️ 無法載入設定檔');
@@ -283,24 +430,30 @@
 
     /* === AUDIO EVENTS === */
     audio.addEventListener('timeupdate', function() {
-      if (audio.duration) {
-        D['progress-fill'].style.width = (audio.currentTime / audio.duration * 100) + '%';
-        D['audio-time'].textContent = formatTime(audio.currentTime);
-      }
+      if (!audio.duration) return;
+      var pct = audio.currentTime / audio.duration * 100;
+      D['player-fill'].style.width = pct + '%';
+      D['player-time-current'].textContent = formatTime(audio.currentTime);
+    });
+    audio.addEventListener('loadedmetadata', function() {
+      D['player-time-total'].textContent = formatTime(audio.duration);
     });
     audio.addEventListener('play', function() {
-      D['btn-play'].textContent = '⏸';
-      D['tap-overlay'].classList.remove('show');
+      D['ctrl-play'].textContent = '⏸';
+      D['tap-hint'].classList.remove('show');
     });
-    audio.addEventListener('pause', function() { D['btn-play'].textContent = '▶'; });
-    audio.addEventListener('ended', function() { D['btn-play'].textContent = '▶'; D['progress-fill'].style.width = '0%'; });
+    audio.addEventListener('pause', function() {
+      D['ctrl-play'].textContent = '▶';
+    });
+    audio.addEventListener('ended', function() {
+      D['ctrl-play'].textContent = '▶';
+      D['player-fill'].style.width = '0%';
+    });
     audio.addEventListener('error', function() {
       var code = audio.error ? audio.error.code : 0;
       var msg = '⚠️ 音檔載入失敗';
-      if (code === 4) msg += '（格式不支援或檔案不存在）';
-      else if (code === 2) msg += '（網路錯誤）';
+      if (code === 4) msg += '（檔案不存在或格式不支援）';
       showToast(msg);
-      console.error('Audio error code:', code, 'src:', audio.src);
     });
 
     /* === CONSENT === */
@@ -308,13 +461,9 @@
       if (consentDone) return;
       consentDone = true;
 
-      // ★ 在使用者手勢中解鎖 Audio 元件
-      // 播放一段極短的靜音，讓瀏覽器記住「這個 Audio 元件已被使用者允許」
       audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
       var p = audio.play();
-      if (p && p.then) {
-        p.then(function() { audio.pause(); }).catch(function() {});
-      }
+      if (p && p.then) p.then(function() { audio.pause(); }).catch(function() {});
 
       startScanner();
       var cs = D['consent-screen'];
@@ -332,8 +481,7 @@
       scanner.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: function(w, h) { var s = Math.min(w, h) * 0.7; return { width: s, height: s }; }, disableFlip: false },
-        onScanSuccess,
-        function() {}
+        onScanSuccess, function() {}
       ).then(function() {
         isScanning = true;
         D['status-dot'].classList.add('scanning');
@@ -369,66 +517,81 @@
           }
         }
       }
-      playAudio(url, name || text);
-
-      setTimeout(function() {
-        D['status-dot'].classList.remove('found');
-        D['status-dot'].classList.add('scanning');
-        D['status-text'].textContent = '掃描中，請將 QR Code 對準鏡頭...';
-      }, 2500);
+      openPlayer(url, name || text);
     }
 
-    /* === AUDIO PLAYBACK === */
-    function playAudio(url, name) {
-      // 更新 UI
-      D['audio-title'].textContent = name || '正在播放';
-      D['audio-file-name'].textContent = url;
-      D['audio-player'].classList.add('visible');
-      D['progress-fill'].style.width = '0%';
-      D['audio-time'].textContent = '0:00';
-      D['tap-overlay'].classList.remove('show');
+    /* === PLAYER OVERLAY === */
+    function openPlayer(url, name) {
+      // Update UI
+      D['player-title'].textContent = name;
+      D['player-subtitle'].textContent = url;
+      D['player-fill'].style.width = '0%';
+      D['player-time-current'].textContent = '0:00';
+      D['player-time-total'].textContent = '0:00';
+      D['ctrl-play'].textContent = '⏳';
+      D['tap-hint'].classList.remove('show');
 
-      // 設定音源並嘗試播放
-      pendingUrl = url;
+      // Open overlay
+      var overlay = D['player-overlay'];
+      overlay.style.display = 'flex';
+      overlay.classList.remove('closing');
+      // Force reflow for animation
+      void overlay.offsetWidth;
+      overlay.classList.add('open');
+
+      // Stop scanner to save resources
+      stopScanner();
+
+      // Load & play
       audio.src = url;
       audio.load();
 
       var playPromise = audio.play();
       if (playPromise && playPromise.then) {
         playPromise.then(function() {
-          // ✅ 自動播放成功！
-          D['status-text'].textContent = '🔊 正在播放：' + (name || url);
-        }).catch(function(e) {
-          console.log('自動播放被擋:', e.name);
-          // ★ 自動播放失敗 → 顯示「點一下播放」覆蓋層
-          D['tap-overlay'].classList.add('show');
-          D['status-text'].textContent = '👆 請點擊播放按鈕';
+          D['ctrl-play'].textContent = '⏸';
+        }).catch(function() {
+          D['ctrl-play'].textContent = '▶';
+          D['tap-hint'].classList.add('show');
         });
       }
 
-      addToHistory(name || url, url);
+      addToHistory(name, url);
     }
 
-    // ★ 點擊「點一下播放」→ 這是使用者手勢，所以一定能播
+    function closePlayer() {
+      var overlay = D['player-overlay'];
+      overlay.classList.add('closing');
+      overlay.classList.remove('open');
+      setTimeout(function() {
+        overlay.style.display = 'none';
+        overlay.classList.remove('closing');
+      }, 350);
+
+      audio.pause();
+
+      // Resume scanner
+      D['status-dot'].classList.remove('found');
+      if (consentDone) startScanner();
+    }
+
     function tapToPlay() {
-      D['tap-overlay'].classList.remove('show');
+      D['tap-hint'].classList.remove('show');
       audio.play().catch(function() {});
     }
 
     function togglePlay() {
-      if (!audio.src || audio.src === window.location.href) return;
+      if (!audio.src) return;
       if (audio.paused) {
-        audio.play().catch(function() {
-          D['tap-overlay'].classList.add('show');
-        });
+        audio.play().catch(function() { D['tap-hint'].classList.add('show'); });
       } else {
         audio.pause();
       }
     }
 
-    function seekFromEvent(e) {
+    function seekPlayer(e) {
       if (!audio.duration) return;
-      var rect = D['progress-bar'].getBoundingClientRect();
+      var rect = D['player-progress'].getBoundingClientRect();
       var cx = e.clientX;
       if (e.touches && e.touches.length) cx = e.touches[0].clientX;
       if (e.changedTouches && e.changedTouches.length) cx = e.changedTouches[0].clientX;
@@ -436,12 +599,15 @@
     }
 
     function formatTime(s) {
+      if (!s || isNaN(s)) return '0:00';
       var m = Math.floor(s / 60), sec = Math.floor(s % 60);
       return m + ':' + (sec < 10 ? '0' : '') + sec;
     }
 
     /* === HISTORY === */
     function addToHistory(name, url) {
+      // Remove duplicate
+      playHistory = playHistory.filter(function(h) { return h.url !== url; });
       playHistory.unshift({ name: name, url: url, time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) });
       if (playHistory.length > 20) playHistory.pop();
       renderHistory();
@@ -455,7 +621,7 @@
         var div = document.createElement('div');
         div.className = 'history-item';
         div.innerHTML = '<div class="history-icon">🔊</div><div class="history-info"><div class="history-name">' + esc(item.name) + '</div><div class="history-time">' + item.time + '</div></div>';
-        div.addEventListener('click', function() { playAudio(item.url, item.name); });
+        div.addEventListener('click', function() { openPlayer(item.url, item.name); });
         D['history-list'].appendChild(div);
       });
     }
@@ -479,7 +645,6 @@
         g.appendChild(card);
       });
     }
-
     function openBook(idx) { currentBook = config.books[idx]; currentPageIndex = 0; showBookPage(); D['book-modal'].classList.add('open'); }
     function showBookPage() {
       if (!currentBook || !currentBook.pages) return;
@@ -520,18 +685,38 @@
       cacheDom();
       D['tab-nav'].style.top = D['app-header'].offsetHeight + 'px';
 
+      // Consent
       document.getElementById('btn-agree').addEventListener('click', handleConsent);
-      D['btn-play'].addEventListener('click', togglePlay);
-      document.getElementById('tap-play-btn').addEventListener('click', tapToPlay);
-      D['tap-overlay'].addEventListener('click', tapToPlay);
-      D['progress-bar'].addEventListener('click', seekFromEvent);
-      D['progress-bar'].addEventListener('touchstart', seekFromEvent, { passive: true });
-      D['progress-bar'].addEventListener('touchmove', seekFromEvent, { passive: true });
+
+      // Tab nav
       D['tab-nav'].addEventListener('click', function(e) { var b = e.target.closest('.tab-btn'); if (b) switchTab(b.getAttribute('data-tab')); });
+
+      // Player overlay
+      document.getElementById('btn-back-to-scan').addEventListener('click', closePlayer);
+      D['ctrl-play'].addEventListener('click', togglePlay);
+      D['tap-hint'].addEventListener('click', tapToPlay);
+      D['player-overlay'].addEventListener('click', function(e) {
+        // Tap anywhere on the overlay background to play (for iOS fallback)
+        if (D['tap-hint'].classList.contains('show') && e.target.closest('.player-content') && !e.target.closest('.player-controls') && !e.target.closest('.player-progress')) {
+          tapToPlay();
+        }
+      });
+
+      // Player progress — click & drag
+      D['player-progress'].addEventListener('click', seekPlayer);
+      D['player-progress'].addEventListener('touchstart', seekPlayer, { passive: true });
+      D['player-progress'].addEventListener('touchmove', seekPlayer, { passive: true });
+
+      // Rewind / Forward 10s
+      document.getElementById('ctrl-rew').addEventListener('click', function() { if (audio.duration) audio.currentTime = Math.max(0, audio.currentTime - 10); });
+      document.getElementById('ctrl-fwd').addEventListener('click', function() { if (audio.duration) audio.currentTime = Math.min(audio.duration, audio.currentTime + 10); });
+
+      // Book modal
       D['btn-prev'].addEventListener('click', function() { if (currentPageIndex > 0) { currentPageIndex--; showBookPage(); } });
       D['btn-next'].addEventListener('click', function() { if (currentBook && currentPageIndex < currentBook.pages.length - 1) { currentPageIndex++; showBookPage(); } });
       document.getElementById('btn-close-book').addEventListener('click', closeBookModal);
 
+      // Book swipe
       (function() {
         var sx = 0;
         D['book-modal'].addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, { passive: true });
@@ -544,11 +729,17 @@
         }, { passive: true });
       })();
 
+      // Keyboard
       document.addEventListener('keydown', function(e) {
-        if (!D['book-modal'].classList.contains('open')) return;
-        if (e.key === 'ArrowLeft' && currentPageIndex > 0) { currentPageIndex--; showBookPage(); }
-        if (e.key === 'ArrowRight' && currentBook && currentPageIndex < currentBook.pages.length - 1) { currentPageIndex++; showBookPage(); }
-        if (e.key === 'Escape') closeBookModal();
+        if (D['book-modal'].classList.contains('open')) {
+          if (e.key === 'ArrowLeft' && currentPageIndex > 0) { currentPageIndex--; showBookPage(); }
+          if (e.key === 'ArrowRight' && currentBook && currentPageIndex < currentBook.pages.length - 1) { currentPageIndex++; showBookPage(); }
+          if (e.key === 'Escape') closeBookModal();
+        }
+        if (D['player-overlay'].classList.contains('open')) {
+          if (e.key === 'Escape') closePlayer();
+          if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+        }
       });
 
       loadConfig();
@@ -568,15 +759,11 @@
       var s2 = document.createElement('script');
       s2.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
       s2.async = true;
-      s2.onerror = function() {
-        var el = document.getElementById('status-text');
-        if (el) el.textContent = '⚠️ 掃描器載入失敗，請確認網路後重新整理';
-      };
+      s2.onerror = function() { var el = document.getElementById('status-text'); if (el) el.textContent = '⚠️ 掃描器載入失敗'; };
       document.body.appendChild(s2);
     };
     document.body.appendChild(s);
   })();
   </script>
-
 </body>
 </html>
