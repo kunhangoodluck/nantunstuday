@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>互動學習平台1.1</title>
+  <title>互動學習平台</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
@@ -16,13 +16,12 @@
       --shadow-lg:0 8px 32px rgba(0,0,0,.12); --radius:16px; --radius-sm:10px;
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    button,a,.book-card,.history-item,.tab-btn,.btn-consent,.btn-play,.btn-nav,.btn-close-modal,.btn-download{
+    button,a,.book-card,.history-item,.tab-btn,.btn-consent,.btn-play,.btn-nav,.btn-close-modal,.btn-download,.tap-overlay{
       touch-action:manipulation;-webkit-touch-callout:none;cursor:pointer;
     }
     body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
 
 ```
-/* CONSENT */
 #consent-screen{position:fixed;inset:0;background:linear-gradient(135deg,#FF6B35,#FF8C5A 40%,#FFA96B);display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .4s,transform .4s}
 #consent-screen.hidden{opacity:0;transform:scale(1.05);pointer-events:none}
 .consent-box{background:#fff;border-radius:24px;padding:48px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:slideUp .5s ease-out}
@@ -35,26 +34,22 @@
 .btn-consent{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;padding:16px 48px;font-size:18px;font-weight:700;border-radius:50px;font-family:inherit;box-shadow:0 4px 20px rgba(255,107,53,.4);transition:transform .15s}
 .btn-consent:active{transform:scale(.96)}
 
-/* HEADER */
 .app-header{background:#fff;padding:14px 20px;box-shadow:0 1px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:100}
 .header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
 .site-title{font-size:20px;font-weight:900;color:var(--secondary)}
 .site-title span{color:var(--primary)}
 
-/* TABS */
 .tab-nav{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;z-index:99;max-width:800px;margin:0 auto}
 .tab-btn{flex:1;padding:14px 8px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text-light);position:relative;transition:color .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
 .tab-btn .tab-icon{font-size:20px}
 .tab-btn.active{color:var(--primary);font-weight:700}
 .tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:20%;right:20%;height:3px;background:var(--primary);border-radius:3px 3px 0 0}
 
-/* MAIN */
 .main-content{max-width:800px;margin:0 auto;padding:20px 16px 100px}
 .tab-panel{display:none}
 .tab-panel.active{display:block;animation:fadeIn .25s ease-out}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* SCANNER */
 .scanner-wrapper{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
 .scanner-header{padding:20px 20px 12px}
 .scanner-header h2{font-size:20px;font-weight:700;color:var(--secondary);margin-bottom:6px}
@@ -67,8 +62,7 @@
 .status-dot.found{background:var(--primary)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
 
-/* AUDIO PLAYER */
-.audio-player{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:none}
+.audio-player{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:none;position:relative}
 .audio-player.visible{display:block;animation:fadeIn .25s}
 .audio-player-title{font-size:16px;font-weight:700;color:var(--secondary);margin-bottom:4px}
 .audio-player-file{font-size:13px;color:var(--text-light);margin-bottom:14px;word-break:break-all}
@@ -79,7 +73,23 @@
 .progress-fill{height:100%;width:0%;background:var(--primary);border-radius:3px;transition:width .1s linear}
 .audio-time{font-size:12px;color:var(--text-light);font-variant-numeric:tabular-nums;min-width:40px;text-align:right}
 
-/* HISTORY */
+/* ★ 點擊播放的覆蓋層 — iOS 自動播放失敗時顯示 */
+.tap-overlay{
+  position:absolute;inset:0;background:rgba(255,255,255,.92);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;
+  border-radius:var(--radius);z-index:10;
+}
+.tap-overlay.show{display:flex}
+.tap-overlay-btn{
+  width:72px;height:72px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(255,107,53,.4);
+  animation:tapPulse 1.5s ease-in-out infinite;
+}
+@keyframes tapPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.tap-overlay-text{font-size:15px;font-weight:700;color:var(--primary)}
+
 .audio-history{margin-top:20px}
 .audio-history h3{font-size:15px;font-weight:700;color:var(--text-light);margin-bottom:10px}
 .history-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card);border-radius:var(--radius-sm);margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:background .15s}
@@ -89,7 +99,6 @@
 .history-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .history-time{font-size:12px;color:var(--text-light)}
 
-/* BOOKS */
 .book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
 .book-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .15s}
 .book-card:active{transform:scale(.97)}
@@ -101,7 +110,6 @@
 .book-desc{font-size:12px;color:var(--text-light)}
 .book-pages-count{font-size:12px;color:var(--primary);font-weight:500;margin-top:4px}
 
-/* BOOK MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;flex-direction:column}
 .modal-overlay.open{display:flex}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;color:#fff}
@@ -115,7 +123,6 @@
 .btn-nav:active{background:rgba(255,255,255,.3)}
 .btn-nav:disabled{opacity:.3}
 
-/* WORKSHEETS */
 .worksheet-list{display:flex;flex-direction:column;gap:12px}
 .worksheet-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;display:flex;align-items:center;gap:14px}
 .ws-icon{width:48px;height:48px;background:var(--accent-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
@@ -127,7 +134,6 @@
 .ws-tag.subject{background:#E8F0FE;color:#1a5fb4}
 .btn-download{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;text-decoration:none;white-space:nowrap}
 
-/* MISC */
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-light)}
 .empty-state .empty-icon{font-size:56px;margin-bottom:16px;display:block}
 .empty-state h3{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)}
@@ -148,8 +154,6 @@
 </head>
 <body>
 
-  <!-- CONSENT SCREEN -->
-
   <div id="consent-screen">
     <div class="consent-box">
       <span class="consent-icon">🎧</span>
@@ -163,8 +167,6 @@
       <button class="btn-consent" id="btn-agree">同意並開始使用</button>
     </div>
   </div>
-
-  <!-- APP -->
 
   <header class="app-header" id="app-header">
     <div class="header-inner">
@@ -201,6 +203,11 @@
           </div>
           <span class="audio-time" id="audio-time">0:00</span>
         </div>
+        <!-- ★ iOS 自動播放失敗時的點擊播放覆蓋層 -->
+        <div class="tap-overlay" id="tap-overlay">
+          <button class="tap-overlay-btn" id="tap-play-btn">▶</button>
+          <span class="tap-overlay-text">點一下播放</span>
+        </div>
       </div>
       <div class="audio-history" id="audio-history" style="display:none">
         <h3>📜 播放紀錄</h3>
@@ -235,29 +242,22 @@
   (function() {
     "use strict";
 
-    /* === STATE === */
     var config = null, scanner = null, isScanning = false;
     var playHistory = [], currentBook = null, currentPageIndex = 0;
     var consentDone = false, lastScanTime = 0;
+    var pendingUrl = '';
 
-    /* AudioContext 音訊系統 */
-    var audioCtx = null;
-    var currentSource = null;
-    var currentBuffer = null;
-    var audioStartTime = 0;
-    var audioOffset = 0;
-    var isPlaying = false;
-    var progressTimer = null;
+    // ★ 單一 Audio 元件，整個生命週期只用這一個
+    var audio = new Audio();
+    audio.preload = 'auto';
 
-    /* DOM cache */
     var D = {};
-
     function cacheDom() {
       ['consent-screen','status-dot','status-text','audio-player','audio-title',
        'audio-file-name','btn-play','progress-fill','progress-bar','audio-time',
        'audio-history','history-list','book-grid','worksheet-list','book-modal',
        'modal-page-img','modal-book-title','modal-page-info','btn-prev','btn-next',
-       'site-title','app-header','tab-nav','toast'].forEach(function(id) {
+       'site-title','app-header','tab-nav','toast','tap-overlay'].forEach(function(id) {
         D[id] = document.getElementById(id);
       });
     }
@@ -281,23 +281,42 @@
       });
     }
 
+    /* === AUDIO EVENTS === */
+    audio.addEventListener('timeupdate', function() {
+      if (audio.duration) {
+        D['progress-fill'].style.width = (audio.currentTime / audio.duration * 100) + '%';
+        D['audio-time'].textContent = formatTime(audio.currentTime);
+      }
+    });
+    audio.addEventListener('play', function() {
+      D['btn-play'].textContent = '⏸';
+      D['tap-overlay'].classList.remove('show');
+    });
+    audio.addEventListener('pause', function() { D['btn-play'].textContent = '▶'; });
+    audio.addEventListener('ended', function() { D['btn-play'].textContent = '▶'; D['progress-fill'].style.width = '0%'; });
+    audio.addEventListener('error', function() {
+      var code = audio.error ? audio.error.code : 0;
+      var msg = '⚠️ 音檔載入失敗';
+      if (code === 4) msg += '（格式不支援或檔案不存在）';
+      else if (code === 2) msg += '（網路錯誤）';
+      showToast(msg);
+      console.error('Audio error code:', code, 'src:', audio.src);
+    });
+
     /* === CONSENT === */
     function handleConsent() {
       if (consentDone) return;
       consentDone = true;
 
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        audioCtx.resume();
-        var buf = audioCtx.createBuffer(1, 1, 22050);
-        var src = audioCtx.createBufferSource();
-        src.buffer = buf;
-        src.connect(audioCtx.destination);
-        src.start(0);
-      } catch(e) { console.warn('AudioCtx:', e); }
+      // ★ 在使用者手勢中解鎖 Audio 元件
+      // 播放一段極短的靜音，讓瀏覽器記住「這個 Audio 元件已被使用者允許」
+      audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+      var p = audio.play();
+      if (p && p.then) {
+        p.then(function() { audio.pause(); }).catch(function() {});
+      }
 
       startScanner();
-
       var cs = D['consent-screen'];
       cs.classList.add('hidden');
       setTimeout(function() { cs.style.display = 'none'; }, 400);
@@ -321,7 +340,7 @@
         D['status-text'].textContent = '掃描中，請將 QR Code 對準鏡頭...';
       }).catch(function(err) {
         console.error('cam:', err);
-        D['status-text'].textContent = '⚠️ 無法啟動相機，請確認已授權相機權限';
+        D['status-text'].textContent = '⚠️ 無法啟動相機，請確認已授權';
       });
     }
 
@@ -338,7 +357,7 @@
 
       D['status-dot'].classList.remove('scanning');
       D['status-dot'].classList.add('found');
-      D['status-text'].textContent = '✅ 掃描成功，正在播放...';
+      D['status-text'].textContent = '✅ 掃描成功！';
 
       var url = text, name = '';
       if (config && config.audioFiles) {
@@ -359,115 +378,61 @@
       }, 2500);
     }
 
-    /* === AUDIO (pure AudioContext) === */
+    /* === AUDIO PLAYBACK === */
     function playAudio(url, name) {
-      stopCurrentAudio();
-
+      // 更新 UI
       D['audio-title'].textContent = name || '正在播放';
       D['audio-file-name'].textContent = url;
       D['audio-player'].classList.add('visible');
-      D['btn-play'].textContent = '⏳';
       D['progress-fill'].style.width = '0%';
       D['audio-time'].textContent = '0:00';
+      D['tap-overlay'].classList.remove('show');
 
-      if (!audioCtx) { showToast('⚠️ 請重新整理頁面'); return; }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      // 設定音源並嘗試播放
+      pendingUrl = url;
+      audio.src = url;
+      audio.load();
 
-      fetch(url).then(function(r) {
-        if (!r.ok) throw new Error('找不到音檔 (' + r.status + ')');
-        return r.arrayBuffer();
-      }).then(function(ab) {
-        return audioCtx.decodeAudioData(ab);
-      }).then(function(decoded) {
-        currentBuffer = decoded;
-        audioOffset = 0;
-        startPlayback();
-      }).catch(function(e) {
-        console.error('audio load:', e);
-        showToast('⚠️ ' + e.message);
-        D['btn-play'].textContent = '▶';
-      });
+      var playPromise = audio.play();
+      if (playPromise && playPromise.then) {
+        playPromise.then(function() {
+          // ✅ 自動播放成功！
+          D['status-text'].textContent = '🔊 正在播放：' + (name || url);
+        }).catch(function(e) {
+          console.log('自動播放被擋:', e.name);
+          // ★ 自動播放失敗 → 顯示「點一下播放」覆蓋層
+          D['tap-overlay'].classList.add('show');
+          D['status-text'].textContent = '👆 請點擊播放按鈕';
+        });
+      }
 
       addToHistory(name || url, url);
     }
 
-    function startPlayback() {
-      if (!currentBuffer || !audioCtx) return;
-      stopSource();
-      currentSource = audioCtx.createBufferSource();
-      currentSource.buffer = currentBuffer;
-      currentSource.connect(audioCtx.destination);
-      var off = Math.min(audioOffset, currentBuffer.duration);
-      currentSource.start(0, off);
-      audioStartTime = audioCtx.currentTime;
-      isPlaying = true;
-      D['btn-play'].textContent = '⏸';
-
-      currentSource.onended = function() {
-        if (isPlaying) {
-          isPlaying = false;
-          audioOffset = 0;
-          D['btn-play'].textContent = '▶';
-          D['progress-fill'].style.width = '0%';
-          D['audio-time'].textContent = formatTime(currentBuffer ? currentBuffer.duration : 0);
-          clearInterval(progressTimer);
-        }
-      };
-      clearInterval(progressTimer);
-      progressTimer = setInterval(updateProgress, 100);
-    }
-
-    function stopSource() {
-      if (currentSource) {
-        try { currentSource.onended = null; currentSource.stop(); } catch(e) {}
-        currentSource = null;
-      }
-      clearInterval(progressTimer);
-    }
-
-    function stopCurrentAudio() {
-      if (isPlaying) audioOffset += audioCtx.currentTime - audioStartTime;
-      stopSource();
-      isPlaying = false;
+    // ★ 點擊「點一下播放」→ 這是使用者手勢，所以一定能播
+    function tapToPlay() {
+      D['tap-overlay'].classList.remove('show');
+      audio.play().catch(function() {});
     }
 
     function togglePlay() {
-      if (!currentBuffer) return;
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      if (isPlaying) {
-        audioOffset += audioCtx.currentTime - audioStartTime;
-        stopSource();
-        isPlaying = false;
-        D['btn-play'].textContent = '▶';
+      if (!audio.src || audio.src === window.location.href) return;
+      if (audio.paused) {
+        audio.play().catch(function() {
+          D['tap-overlay'].classList.add('show');
+        });
       } else {
-        if (audioOffset >= currentBuffer.duration) audioOffset = 0;
-        startPlayback();
+        audio.pause();
       }
     }
 
-    function updateProgress() {
-      if (!currentBuffer || !isPlaying) return;
-      var t = audioOffset + (audioCtx.currentTime - audioStartTime);
-      var dur = currentBuffer.duration;
-      if (t > dur) t = dur;
-      D['progress-fill'].style.width = (t / dur * 100) + '%';
-      D['audio-time'].textContent = formatTime(t);
-    }
-
     function seekFromEvent(e) {
-      if (!currentBuffer) return;
+      if (!audio.duration) return;
       var rect = D['progress-bar'].getBoundingClientRect();
       var cx = e.clientX;
       if (e.touches && e.touches.length) cx = e.touches[0].clientX;
       if (e.changedTouches && e.changedTouches.length) cx = e.changedTouches[0].clientX;
-      var pct = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
-      audioOffset = pct * currentBuffer.duration;
-      if (isPlaying) {
-        startPlayback();
-      } else {
-        D['progress-fill'].style.width = (pct * 100) + '%';
-        D['audio-time'].textContent = formatTime(audioOffset);
-      }
+      audio.currentTime = Math.max(0, Math.min(1, (cx - rect.left) / rect.width)) * audio.duration;
     }
 
     function formatTime(s) {
@@ -515,13 +480,7 @@
       });
     }
 
-    function openBook(idx) {
-      currentBook = config.books[idx];
-      currentPageIndex = 0;
-      showBookPage();
-      D['book-modal'].classList.add('open');
-    }
-
+    function openBook(idx) { currentBook = config.books[idx]; currentPageIndex = 0; showBookPage(); D['book-modal'].classList.add('open'); }
     function showBookPage() {
       if (!currentBook || !currentBook.pages) return;
       D['modal-book-title'].textContent = currentBook.title;
@@ -530,7 +489,6 @@
       D['btn-prev'].disabled = currentPageIndex === 0;
       D['btn-next'].disabled = currentPageIndex >= currentBook.pages.length - 1;
     }
-
     function closeBookModal() { D['book-modal'].classList.remove('open'); currentBook = null; }
 
     /* === WORKSHEETS === */
@@ -564,6 +522,8 @@
 
       document.getElementById('btn-agree').addEventListener('click', handleConsent);
       D['btn-play'].addEventListener('click', togglePlay);
+      document.getElementById('tap-play-btn').addEventListener('click', tapToPlay);
+      D['tap-overlay'].addEventListener('click', tapToPlay);
       D['progress-bar'].addEventListener('click', seekFromEvent);
       D['progress-bar'].addEventListener('touchstart', seekFromEvent, { passive: true });
       D['progress-bar'].addEventListener('touchmove', seekFromEvent, { passive: true });
@@ -598,8 +558,6 @@
     else init();
   })();
   </script>
-
-  <!-- QR library: async, with fallback CDN -->
 
   <script>
   (function() {
