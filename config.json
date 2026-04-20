@@ -1,14 +1,76 @@
 {
   "siteName": "📚 互動學習平台",
   "welcomeMessage": "歡迎使用互動學習平台！掃描 QR Code 即可聆聽音檔。",
-  "backgroundImage": "",
   "audioFiles": [
     {
       "id": "lesson01",
-      "name": "第一課 範例音檔",
-      "file": "audio/lesson01.mp3",
-      "description": "這是一個範例音檔",
-      "cover": ""
+      "name": "麻芛湯",
+      "file": "audio/lesson01.mp3"
+    },
+    {
+      "id": "lesson02",
+      "name": "麻芛湯 KALA",
+      "file": "audio/lesson02.mp3"
+    },
+    {
+      "id": "lesson03",
+      "name": "1-1",
+      "file": "audio/1-1.m4a"
+    },
+    {
+      "id": "lesson04",
+      "name": "1-2",
+      "file": "audio/1-2.m4a"
+    },
+    {
+      "id": "lesson05",
+      "name": "1-3",
+      "file": "audio/1-3.m4a"
+    },
+    {
+      "id": "lesson06",
+      "name": "1-4",
+      "file": "audio/1-4.m4a"
+    },
+    {
+      "id": "lesson07",
+      "name": "1-5",
+      "file": "audio/1-5.m4a"
+    },
+    {
+      "id": "lesson08",
+      "name": "1-6",
+      "file": "audio/1-6.m4a"
+    },
+    {
+      "id": "lesson09",
+      "name": "1-7",
+      "file": "audio/1-7.m4a"
+    },
+    {
+      "id": "lesson10",
+      "name": "1-8",
+      "file": "audio/1-8.m4a"
+    },
+    {
+      "id": "lesson11",
+      "name": "1-9",
+      "file": "audio/1-9.m4a"
+    },
+    {
+      "id": "1-10",
+      "name": "1-10",
+      "file": "audio/1-10.m4a"
+    },
+    {
+      "id": "2-1",
+      "name": "2-1",
+      "file": "audio/2-1.m4a"
+    },
+    {
+      "id": "2-2",
+      "name": "2-2",
+      "file": "audio/2-2.m4a"
     }
   ],
   "books": [],
