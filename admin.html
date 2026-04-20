@@ -1464,8 +1464,17 @@
 
       new QRCode(qrDiv, { text: content, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
 
-      card.innerHTML += `<div class="qr-label">${esc(label)}</div>
-        <div class="qr-sublabel">${esc(content)}</div>`;
+      // Use appendChild instead of innerHTML += to preserve the canvas
+      const labelEl = document.createElement('div');
+      labelEl.className = 'qr-label';
+      labelEl.textContent = label;
+      card.appendChild(labelEl);
+
+      const subEl = document.createElement('div');
+      subEl.className = 'qr-sublabel';
+      subEl.textContent = content;
+      card.appendChild(subEl);
+
       container.appendChild(card);
     }
 
