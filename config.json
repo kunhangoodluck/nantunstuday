@@ -1,16 +1,14 @@
 {
   "siteName": "📚 互動學習平台",
   "welcomeMessage": "歡迎使用互動學習平台！掃描 QR Code 即可聆聽音檔。",
+  "backgroundImage": "",
   "audioFiles": [
     {
       "id": "lesson01",
-      "name": "麻穎湯",
-      "file": "audio/lesson01.mp3"
-    },
-    {
-      "id": "lesson02",
-      "name": "麻穎湯_KALA",
-      "file": "audio/lesson02.mp3"
+      "name": "第一課 範例音檔",
+      "file": "audio/lesson01.mp3",
+      "description": "這是一個範例音檔",
+      "cover": ""
     }
   ],
   "books": [],

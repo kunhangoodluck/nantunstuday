@@ -431,7 +431,14 @@
       text-align: center;
       box-shadow: var(--shadow-sm);
     }
-    .qr-card canvas { max-width: 100%; height: auto; }
+    .qr-card canvas { max-width: 100%; height: auto; display: block; }
+    .qr-white-bg {
+      display: inline-block;
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      border: 2px solid #eee;
+    }
     .qr-label {
       font-size: 13px;
       font-weight: 700;
@@ -895,6 +902,12 @@
                 placeholder="歡迎使用互動學習平台！"
                 oninput="updateSettings()"></textarea>
             </div>
+            <div class="form-group">
+              <label class="form-label">網站背景圖片路徑（選填）</label>
+              <input class="form-input" id="setting-backgroundImage" placeholder="images/background.jpg"
+                oninput="updateSettings()">
+              <p class="form-hint">設定後整個網站會以此圖片為背景。建議使用淡色或半透明圖片，避免影響文字閱讀。留空則使用預設背景色。</p>
+            </div>
           </div>
         </div>
       </div>
@@ -911,22 +924,27 @@
       </div>
       <div class="dialog-body">
         <div class="form-group">
-          <label class="form-label">ID（辨識碼）</label>
-          <input class="form-input" id="audio-id" placeholder="lesson01">
-          <p class="form-hint">QR Code 可掃描此 ID 來播放音檔，建議用英文與數字</p>
+          <label class="form-label">ID（= 檔名）</label>
+          <input class="form-input" id="audio-id" placeholder="例如：lesson01" oninput="autoFillAudioPath()">
+          <p class="form-hint">輸入 ID 後會自動產生檔案路徑。ID 就是你上傳的檔名（不含副檔名）</p>
         </div>
         <div class="form-group">
-          <label class="form-label">名稱</label>
-          <input class="form-input" id="audio-name" placeholder="第一課 我的家人">
+          <label class="form-label">檔案路徑（自動產生）</label>
+          <input class="form-input" id="audio-file" placeholder="輸入 ID 後自動產生" style="background:#f5f5f5">
+          <p class="form-hint">預設為 audio/ID.mp3，如果是 m4a 檔請手動修改副檔名</p>
         </div>
         <div class="form-group">
-          <label class="form-label">檔案路徑</label>
-          <input class="form-input" id="audio-file" placeholder="audio/lesson01.mp3">
-          <p class="form-hint">相對於網站根目錄的路徑</p>
+          <label class="form-label">顯示名稱（選填）</label>
+          <input class="form-input" id="audio-name" placeholder="留空則使用 ID 作為名稱">
         </div>
         <div class="form-group">
           <label class="form-label">說明（選填）</label>
-          <input class="form-input" id="audio-desc" placeholder="國語課文朗讀">
+          <input class="form-input" id="audio-desc" placeholder="例如：國語課文朗讀">
+        </div>
+        <div class="form-group">
+          <label class="form-label">專輯封面圖片路徑（選填）</label>
+          <input class="form-input" id="audio-cover" placeholder="例如：covers/lesson01.jpg">
+          <p class="form-hint">掃描播放時會顯示此圖片。建議尺寸 400x400 以上，支援 JPG/PNG</p>
         </div>
       </div>
       <div class="dialog-footer">
@@ -1041,6 +1059,7 @@
     let data = {
       siteName: '📚 互動學習平台',
       welcomeMessage: '歡迎使用互動學習平台！掃描 QR Code 即可聆聽音檔。',
+      backgroundImage: '',
       audioFiles: [],
       books: [],
       worksheets: []
@@ -1131,33 +1150,41 @@
       `).join('') + '</ul>';
     }
 
+    function autoFillAudioPath() {
+      var id = document.getElementById('audio-id').value.trim();
+      if (id) {
+        document.getElementById('audio-file').value = 'audio/' + id + '.mp3';
+      } else {
+        document.getElementById('audio-file').value = '';
+      }
+    }
+
     function openAudioDialog(idx) {
       editIndex = idx !== undefined ? idx : -1;
       const isEdit = editIndex >= 0;
       document.getElementById('dialog-audio-title').textContent = isEdit ? '編輯音檔' : '新增音檔';
       document.getElementById('btn-save-audio').textContent = isEdit ? '儲存' : '新增';
-      const a = isEdit ? data.audioFiles[editIndex] : { id: '', name: '', file: '', description: '' };
+      const a = isEdit ? data.audioFiles[editIndex] : { id: '', name: '', file: '', description: '', cover: '' };
       document.getElementById('audio-id').value = a.id;
       document.getElementById('audio-name').value = a.name;
       document.getElementById('audio-file').value = a.file;
       document.getElementById('audio-desc').value = a.description || '';
-      // Auto-generate ID suggestion
-      if (!isEdit) {
-        const num = String(data.audioFiles.length + 1).padStart(2, '0');
-        document.getElementById('audio-id').value = 'lesson' + num;
-        document.getElementById('audio-file').value = 'audio/lesson' + num + '.mp3';
-      }
+      document.getElementById('audio-cover').value = a.cover || '';
       openDialog('audio');
     }
 
     function saveAudio() {
+      const id = document.getElementById('audio-id').value.trim();
+      const file = document.getElementById('audio-file').value.trim();
+      const name = document.getElementById('audio-name').value.trim();
       const obj = {
-        id: document.getElementById('audio-id').value.trim(),
-        name: document.getElementById('audio-name').value.trim(),
-        file: document.getElementById('audio-file').value.trim(),
-        description: document.getElementById('audio-desc').value.trim()
+        id: id,
+        name: name || id,
+        file: file,
+        description: document.getElementById('audio-desc').value.trim(),
+        cover: document.getElementById('audio-cover').value.trim()
       };
-      if (!obj.id || !obj.name || !obj.file) return toast('請填寫 ID、名稱與檔案路徑', 'error');
+      if (!obj.id || !obj.file) return toast('請填寫 ID', 'error');
       if (editIndex >= 0) {
         data.audioFiles[editIndex] = obj;
         toast('已更新：' + obj.name, 'success');
@@ -1424,24 +1451,23 @@
       });
     }
 
-function createQRCard(container, content, label) {
-  const card = document.createElement('div');
-  card.className = 'qr-card';
-  
-  const qrDiv = document.createElement('div');
-  card.appendChild(qrDiv);
-  
-  // 生成 QR Code
-  new QRCode(qrDiv, { text: content, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
-  
-  // ✅ 正確寫法：使用 insertAdjacentHTML，這只會把新元素「插入」到後面，不會觸發整個 DOM 重繪
-  card.insertAdjacentHTML('beforeend', `
-    <div class="qr-label">${esc(label)}</div>
-    <div class="qr-sublabel">${esc(content)}</div>
-  `);
-  
-  container.appendChild(card);
-}
+    function createQRCard(container, content, label) {
+      const card = document.createElement('div');
+      card.className = 'qr-card';
+
+      // White background wrapper with padding
+      const wrapper = document.createElement('div');
+      wrapper.className = 'qr-white-bg';
+      const qrDiv = document.createElement('div');
+      wrapper.appendChild(qrDiv);
+      card.appendChild(wrapper);
+
+      new QRCode(qrDiv, { text: content, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+
+      card.innerHTML += `<div class="qr-label">${esc(label)}</div>
+        <div class="qr-sublabel">${esc(content)}</div>`;
+      container.appendChild(card);
+    }
 
     function downloadAllQR() {
       const cards = document.querySelectorAll('.page-panel.active .qr-card');
@@ -1450,9 +1476,19 @@ function createQRCard(container, content, label) {
         const canvas = card.querySelector('canvas');
         const label = card.querySelector('.qr-label')?.textContent || i;
         if (canvas) {
+          // Create new canvas with white padding
+          const pad = 32;
+          const newCanvas = document.createElement('canvas');
+          newCanvas.width = canvas.width + pad * 2;
+          newCanvas.height = canvas.height + pad * 2;
+          const ctx = newCanvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+          ctx.drawImage(canvas, pad, pad);
+
           const link = document.createElement('a');
           link.download = `qrcode-${label}.png`;
-          link.href = canvas.toDataURL();
+          link.href = newCanvas.toDataURL();
           link.click();
         }
       });
@@ -1463,29 +1499,32 @@ function createQRCard(container, content, label) {
        CONFIG JSON OUTPUT
     ==================================================================== */
     function buildConfig() {
-      return {
+      var cfg = {
         siteName: data.siteName,
         welcomeMessage: data.welcomeMessage,
-        audioFiles: data.audioFiles.map(a => {
-          const obj = { id: a.id, name: a.name, file: a.file };
-          if (a.description) obj.description = a.description;
-          return obj;
-        }),
-        books: data.books.map(b => {
-          const obj = { id: b.id, title: b.title };
-          if (b.cover) obj.cover = b.cover;
-          obj.pages = b.pages || [];
-          if (b.description) obj.description = b.description;
-          return obj;
-        }),
-        worksheets: data.worksheets.map(w => {
-          const obj = { id: w.id, title: w.title, file: w.file };
-          if (w.description) obj.description = w.description;
-          if (w.grade) obj.grade = w.grade;
-          if (w.subject) obj.subject = w.subject;
-          return obj;
-        })
       };
+      if (data.backgroundImage) cfg.backgroundImage = data.backgroundImage;
+      cfg.audioFiles = data.audioFiles.map(a => {
+        const obj = { id: a.id, name: a.name, file: a.file };
+        if (a.description) obj.description = a.description;
+        if (a.cover) obj.cover = a.cover;
+        return obj;
+      });
+      cfg.books = data.books.map(b => {
+        const obj = { id: b.id, title: b.title };
+        if (b.cover) obj.cover = b.cover;
+        obj.pages = b.pages || [];
+        if (b.description) obj.description = b.description;
+        return obj;
+      });
+      cfg.worksheets = data.worksheets.map(w => {
+        const obj = { id: w.id, title: w.title, file: w.file };
+        if (w.description) obj.description = w.description;
+        if (w.grade) obj.grade = w.grade;
+        if (w.subject) obj.subject = w.subject;
+        return obj;
+      });
+      return cfg;
     }
 
     function renderJsonPreview() {
@@ -1576,6 +1615,7 @@ function createQRCard(container, content, label) {
       data = {
         siteName: '📚 互動學習平台',
         welcomeMessage: '歡迎使用互動學習平台！',
+        backgroundImage: '',
         audioFiles: [],
         books: [],
         worksheets: []
@@ -1591,11 +1631,13 @@ function createQRCard(container, content, label) {
     function loadSettings() {
       document.getElementById('setting-siteName').value = data.siteName;
       document.getElementById('setting-welcomeMessage').value = data.welcomeMessage;
+      document.getElementById('setting-backgroundImage').value = data.backgroundImage || '';
     }
 
     function updateSettings() {
       data.siteName = document.getElementById('setting-siteName').value;
       data.welcomeMessage = document.getElementById('setting-welcomeMessage').value;
+      data.backgroundImage = document.getElementById('setting-backgroundImage').value.trim();
       persist();
     }
 
