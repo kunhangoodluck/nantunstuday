@@ -1481,11 +1481,17 @@
     function downloadAllQR() {
       const cards = document.querySelectorAll('.page-panel.active .qr-card');
       if (cards.length === 0) return toast('沒有可下載的 QR Code', 'error');
+
+      toast('⏳ 正在下載 ' + cards.length + ' 張 QR Code...', '');
+      let count = 0;
+
       cards.forEach((card, i) => {
         const canvas = card.querySelector('canvas');
         const label = card.querySelector('.qr-label')?.textContent || i;
-        if (canvas) {
-          // Create new canvas with white padding
+        if (!canvas) return;
+
+        // 每張間隔 300ms，避免瀏覽器擋掉
+        setTimeout(() => {
           const pad = 32;
           const newCanvas = document.createElement('canvas');
           newCanvas.width = canvas.width + pad * 2;
@@ -1499,9 +1505,13 @@
           link.download = `qrcode-${label}.png`;
           link.href = newCanvas.toDataURL();
           link.click();
-        }
+
+          count++;
+          if (count >= cards.length) {
+            toast('✅ 已下載 ' + count + ' 張 QR Code', 'success');
+          }
+        }, i * 300);
       });
-      toast('已下載 ' + cards.length + ' 張 QR Code', 'success');
     }
 
     /* ====================================================================
