@@ -13,7 +13,7 @@
       "file": "audio/lesson02.mp3"
     },
     {
-      "id": "lesson03",
+      "id": "1-1",
       "name": "1-1",
       "file": "audio/1-1.m4a"
     },
@@ -71,6 +71,46 @@
       "id": "2-2",
       "name": "2-2",
       "file": "audio/2-2.m4a"
+    },
+    {
+      "id": "2-3",
+      "name": "2-3",
+      "file": "audio/2-3.m4a"
+    },
+    {
+      "id": "2-4",
+      "name": "2-4",
+      "file": "audio/2-4.m4a"
+    },
+    {
+      "id": "2-5",
+      "name": "2-5",
+      "file": "audio/2-5.m4a"
+    },
+    {
+      "id": "2-6",
+      "name": "2-6",
+      "file": "audio/2-6.m4a"
+    },
+    {
+      "id": "2-7",
+      "name": "2-7",
+      "file": "audio/2-7.m4a"
+    },
+    {
+      "id": "2-8",
+      "name": "2-8",
+      "file": "audio/2-8.m4a"
+    },
+    {
+      "id": "2-9",
+      "name": "2-9",
+      "file": "audio/2-9.m4a"
+    },
+    {
+      "id": "2-10",
+      "name": "2-10",
+      "file": "audio/2-10.m4a"
     }
   ],
   "books": [],
